@@ -44,22 +44,22 @@ LIBS=R3/libR3.a R2/libR2.a jpeg/libjpeg.a fglut/libfglut.a
 
 all: golf
 
-R3/libR3.a: 
+R3/libR3.a:
 	    $(MAKE) -C R3
 
-R2/libR2.a: 
+R2/libR2.a:
 	    $(MAKE) -C R2
 
-jpeg/libjpeg.a: 
+jpeg/libjpeg.a:
 	    $(MAKE) -C jpeg
 
-fglut/libfglut.a: 
+fglut/libfglut.a:
 	$(MAKE) -C fglut
 
-golf: $(OBJS) $(LIBS) 
-	    rm -f $@ 
+golf: $(OBJS) $(LIBS)
+	    rm -f $@
 	    $(CXX) $(CXXFLAGS) $^ -lm -o $@ $(GLLIBS)
-	    
+
 clean:
 	    rm -f *.o golf
 		$(MAKE) -C R3 clean
