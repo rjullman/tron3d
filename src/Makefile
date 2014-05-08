@@ -39,10 +39,10 @@ endif
 # on its corresponding .cpp), as are many of the compilation rules.
 #
 
-OBJS=particleview.o particle.o R3Scene.o
+OBJS=golf.o # R3Scene.o
 LIBS=R3/libR3.a R2/libR2.a jpeg/libjpeg.a fglut/libfglut.a
 
-all: particleview
+all: golf
 
 R3/libR3.a: 
 	    $(MAKE) -C R3
@@ -56,12 +56,12 @@ jpeg/libjpeg.a:
 fglut/libfglut.a: 
 	$(MAKE) -C fglut
 
-particleview: $(OBJS) $(LIBS) 
+golf: $(OBJS) $(LIBS) 
 	    rm -f $@ 
 	    $(CXX) $(CXXFLAGS) $^ -lm -o $@ $(GLLIBS)
 	    
 clean:
-	    rm -f *.o particleview
+	    rm -f *.o golf
 		$(MAKE) -C R3 clean
 		$(MAKE) -C R2 clean
 		$(MAKE) -C jpeg clean

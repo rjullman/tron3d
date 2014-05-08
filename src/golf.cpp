@@ -1,11 +1,6 @@
 #include <stdlib.h>
 #include <math.h>
-
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include <fglut/glut.h>
 
 // angle of rotation for the camera direction
 float angle = 0.0f;
