@@ -8,8 +8,8 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 40.0f;
-static const float TURN_ANGLE = 0.05f;
+static const float PLAYER_SPEED = 35.0f;
+static const float TURN_SPEED = 5.0f;
 
 
 ////////////////////////////////////////////////////////////
@@ -62,9 +62,10 @@ void UpdateCamera(Player *player) {
 
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
    // Turn the player
-   player->direction.Rotate(R3zaxis_vector, player->turn * TURN_ANGLE);
+   player->direction.Rotate(R3zaxis_vector,
+			    player->turn * TURN_SPEED * delta_time);
    // Move the player
-   player->position += player->direction * PLAYER_SPEED * delta_time * 0.1f;
+   player->position += player->direction * PLAYER_SPEED * delta_time;
 
    // TODO: Check for collisions
    // On death set player->dead = true
