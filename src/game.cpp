@@ -52,7 +52,8 @@ void UpdateCamera(Player *player) {
    glTranslatef(player->position.X(), player->position.Y(), 0.0f);
    glRotatef(angle, 0.0f, 0.0f, 1.0f);
    //glutSolidCube(0.8f);
-   R3Box(-.5,-.5,0,.5,.5,.5).Draw();
+   //R3Box(-.5,-.5,0,.5,.5,.5).Draw();
+   player->mesh.Draw();
    glRotatef(-angle, 0.0f, 0.0f, 1.0f);
    glTranslatef(-(player->position.X()), -(player->position.Y()),0.0f);
 }

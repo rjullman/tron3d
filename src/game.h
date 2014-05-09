@@ -27,6 +27,7 @@ struct Player {
 
    R3Point position;
    R3Vector direction;
+   R3Mesh mesh;
    bool dead;
    int turn;
 };
@@ -35,11 +36,20 @@ inline Player::
 Player(void)
    : position(R3Point(0,0,0)),
      direction(R3Vector(1.0f, 0.0f, 0.0f)),
+     mesh(R3Mesh()),
      dead(false),
      turn(NOT_TURNING)
 {
+  mesh.Read("../bikes/m1483.off");
+  R3Point middle(0,0,0);
+  R3Line axisy(middle, R3yaxis_vector, true);
+  mesh.Rotate(-M_PI/2, axisy);
+  R3Line axisx(middle, R3xaxis_vector, true);
+  mesh.Rotate(M_PI/2, axisx);
+  R3Line axisz(middle, R3zaxis_vector, true);
+  mesh.Rotate(M_PI, axisz);
+  mesh.Translate(-2,-0.3,0);
 }
-
 ////////////////////////////////////////////////////////////
 // Game API
 ////////////////////////////////////////////////////////////
