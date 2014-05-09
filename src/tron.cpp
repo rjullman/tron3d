@@ -23,10 +23,25 @@
 static char *input_scene_name = NULL;
 
 
-// Game state variables
+// Menu variables
+
+enum { MAIN_MENU };
+int menu = MAIN_MENU;
+int menu_option = 0;
+
+static const char* main_menu_text[] = {"START GAME", "OPTIONS", "QUIT"};
+enum {
+   START_GAME_SELECTED,
+   OPTIONS_SELECTED,
+   QUIT_SELECTED,
+   NUM_MAIN_MENU_ITEMS
+};
+
+
+// Game variables
 
 vector<Player> players;
-static bool gameover = false;
+static bool gameover = true;
 
 
 // Display variables
@@ -118,8 +133,71 @@ static double GetTime(void)
 void GLUTStop(void);
 
 ////////////////////////////////////////////////////////////
-// SCENE DRAWING CODE
+// GAME DRAWING CODE
 ////////////////////////////////////////////////////////////
+
+void DrawMenuText(const char *text, bool select, double px, double py) {
+	 // Disable lighting
+	 GLboolean lighting = glIsEnabled(GL_LIGHTING);
+	 glDisable(GL_LIGHTING);
+
+	 // Save matrices and setup projection
+	 glMatrixMode(GL_PROJECTION);
+	 glPushMatrix();
+	 glLoadIdentity();
+	 gluOrtho2D(0.0, GLUTwindow_width, 0.0, GLUTwindow_height);
+	 glMatrixMode(GL_MODELVIEW);
+	 glPushMatrix();
+	 glLoadIdentity();
+	 glRasterPos2i(px, py);
+
+	 // Font choice
+	 void * font = GLUT_BITMAP_TIMES_ROMAN_24;
+
+	 // Indicate selecteted char via '*'
+	 if (select) { glutBitmapCharacter(font, '*'); }
+	 int num_spaces = select ? 2 : 4;
+	 for (int i = 0; i < num_spaces; i++)
+	    glutBitmapCharacter(font, ' ');
+
+	 // Display characters
+	 glColor3d(1.0, 1.0, 1.0);
+	 while (*text) {
+	    glutBitmapCharacter(font, *text);
+	    text++;
+	 }
+
+	 // Restore matrices
+	 glMatrixMode(GL_MODELVIEW);
+	 glPopMatrix();
+	 glMatrixMode(GL_PROJECTION);
+	 glPopMatrix();
+	 glFlush();
+
+	 // Restore lighting
+	 if (lighting) glEnable(GL_LIGHTING);
+}
+
+void DrawMenuHelper(const char* text[], int items) {
+   // Keep menu item within bounds
+   if (menu_option < 0) { menu_option = 0; }
+   else if (menu_option >= items) { menu_option = items-1; }
+   for (int i = 0; i < items; i++) {
+      bool selected = (menu_option % items) == i;
+      DrawMenuText(text[i],
+		   selected,
+		   GLUTwindow_width/2 * 0.65,
+		   GLUTwindow_height/2 - (i-1) * 40);
+   }
+}
+
+void DrawMenu() 
+{
+   switch (menu) {
+      case MAIN_MENU:
+	 DrawMenuHelper(main_menu_text, NUM_MAIN_MENU_ITEMS);
+   }
+}
 
 void DrawGame(R3Scene *scene)
 {
@@ -146,11 +224,15 @@ void DrawGame(R3Scene *scene)
   }
 
   // Gameover when only one player remaining
-  gameover = (living <= 1);
+  gameover = (living == 0);
 
   // Remember previous time
   previous_time = current_time;
 }
+
+////////////////////////////////////////////////////////////
+// SCENE DRAWING CODE
+////////////////////////////////////////////////////////////
 
 void DrawShape(R3Shape *shape)
 {
@@ -492,17 +574,21 @@ void GLUTRedraw(void)
    glClearColor(background[0], background[1], background[2], background[3]);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   // Draws the game
-   DrawGame(scene);
+   // Draw Menu
+   if (gameover) {
+      DrawMenu();
+   }
+   // Draw Game
+   else {
+      DrawGame(scene);
 
-//   GLUTDrawText(R3Point(0,0,0), "THIS IS A TEST A WHAT A TEST");
+      // Load scene lights
+      LoadLights(scene);
 
-   // Load scene lights
-   LoadLights(scene);
-
-   // Draw scene surfaces
-   glEnable(GL_LIGHTING);
-   DrawScene(scene);
+      // Draw scene surfaces
+      glEnable(GL_LIGHTING);
+      DrawScene(scene);
+   }
 
    // Quit here so that can save image before exit
    if (quit) {
@@ -519,19 +605,48 @@ void GLUTSpecial(int key, int x, int y)
 {
    // Process keyboard button event
    switch (key) {
-      case GLUT_KEY_LEFT : ToggleMovePlayer(&players[0], TURNING_LEFT); break;
-      case GLUT_KEY_RIGHT : ToggleMovePlayer(&players[0], TURNING_RIGHT); break;
+      case GLUT_KEY_UP:
+	 menu_option--; break;
+      case GLUT_KEY_DOWN:
+	 menu_option++; break;
+      case GLUT_KEY_LEFT :
+	 ToggleMovePlayer(&players[0], TURNING_LEFT); break;
+      case GLUT_KEY_RIGHT :
+	 ToggleMovePlayer(&players[0], TURNING_RIGHT); break;
    }
 
    // Redraw
    glutPostRedisplay();
 }
 
+// Handles all option toggling
+void GLUTEnterPressed() {
+   switch (menu) {
+      case MAIN_MENU:
+	 switch (menu_option) {
+	    case START_GAME_SELECTED:
+	       // Initialize game
+	       InitLevel(1);
+	       gameover = false;
+	       break;
+	    case OPTIONS_SELECTED:
+	       break;
+	    case QUIT_SELECTED:
+	       quit = 1;
+	       break;
+	 }
+	 break;
+   }
+}
 
 void GLUTKeyboard(unsigned char key, int x, int y)
 {
    // Process keyboard button event
    switch (key) {
+      case 13: // ENTER
+	 GLUTEnterPressed();
+	 break;	 
+
       case 'B':
       case 'b':
          show_bboxes = !show_bboxes;
@@ -600,9 +715,6 @@ void GLUTInit(int *argc, char **argv)
    glEnable(GL_LIGHTING);
    glEnable(GL_DEPTH_TEST);
    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
-
-   // Initialize game
-   InitLevel(1);
 }
 
 
