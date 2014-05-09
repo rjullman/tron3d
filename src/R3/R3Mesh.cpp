@@ -92,10 +92,10 @@ Radius(void) const
 void R3Mesh::
 Translate(double dx, double dy, double dz)
 {
-  // Translate the mesh by adding a 
+  // Translate the mesh by adding a
   // vector (dx,dy,dz) to every vertex
 
-  // This is implemented for you as an example 
+  // This is implemented for you as an example
 
   // Create a translation vector
   R3Vector translation(dx, dy, dz);
@@ -116,11 +116,11 @@ Translate(double dx, double dy, double dz)
 void R3Mesh::
 Scale(double sx, double sy, double sz)
 {
-  // Scale the mesh by increasing the distance 
-  // from every vertex to the origin by a factor 
+  // Scale the mesh by increasing the distance
+  // from every vertex to the origin by a factor
   // given for each dimension (sx, sy, sz)
 
-  // This is implemented for you as an example 
+  // This is implemented for you as an example
 
   // Update vertices
   for (unsigned int i = 0; i < vertices.size(); i++) {
@@ -140,10 +140,10 @@ Scale(double sx, double sy, double sz)
 void R3Mesh::
 Rotate(double angle, const R3Line& axis)
 {
-  // Rotate the mesh counter-clockwise by an angle 
+  // Rotate the mesh counter-clockwise by an angle
   // (in radians) around a line axis
 
-  // This is implemented for you as an example 
+  // This is implemented for you as an example
 
   // Update vertices
   for (unsigned int i = 0; i < vertices.size(); i++) {
@@ -161,12 +161,12 @@ Rotate(double angle, const R3Line& axis)
 void R3Mesh::
 RandomNoise(double factor)
 {
-  // Add noise of a random amount and direction 
-  // to the position of every vertex, where the 
+  // Add noise of a random amount and direction
+  // to the position of every vertex, where the
   // input parameter "factor" should be multiplied by
   // the average length of the edges attached to the
   // vertex to determine its maximum displacement
-  // (i.e., displacement distances should be between 
+  // (i.e., displacement distances should be between
   // 0 and "factor * vertex->AverageEdgeLength()"
 
   // FILL IN IMPLEMENTATION HERE
@@ -184,7 +184,7 @@ Inflate(double factor)
   // Move every vertex along its normal direction.
   // The input parameter "factor" should be multiplied by
   // the average length of the edges attached to the
-  // vertex to determine the displacement of each 
+  // vertex to determine the displacement of each
   // vertex along its normal direction.  Note that factor
   // can be negative, which means that the vertex should
   // move in the direction opposite to the normal vector.
@@ -202,7 +202,7 @@ Inflate(double factor)
 void R3Mesh::
 Fun(void)
 {
-  // Warp a mesh using a non-linear mapping of your choice 
+  // Warp a mesh using a non-linear mapping of your choice
   // (examples are sine, bulge, swirl)
 
   // FILL IN IMPLEMENTATION HERE
@@ -218,10 +218,10 @@ Fun(void)
 void R3Mesh::
 Smooth(void)
 {
-  // Smooth the mesh by moving every vertex to a position 
-  // determined by a weighted average of its immediate neighbors 
+  // Smooth the mesh by moving every vertex to a position
+  // determined by a weighted average of its immediate neighbors
   // (with weights determined by a Gaussian with sigma equal to
-  // the average length of edges attached to the vertex, 
+  // the average length of edges attached to the vertex,
   // normalized such that the weights sum to one).
 
   // FILL IN IMPLEMENTATION HERE
@@ -238,11 +238,11 @@ void R3Mesh::
 Sharpen(void)
 {
   // Accentuate details in the mesh by moving every vertex along
-  // the opposite of the vector determined by a weighted average 
-  // of its neighbors  (with weights determined by a Gaussian 
-  // with sigma equal to the average length of edges attached 
+  // the opposite of the vector determined by a weighted average
+  // of its neighbors  (with weights determined by a Gaussian
+  // with sigma equal to the average length of edges attached
   // to the vertex, normalized such that the weights sum to one).
-  // This filter moves vertices by the vector exactly opposite from 
+  // This filter moves vertices by the vector exactly opposite from
   // the one used for Smooth().
 
   // FILL IN IMPLEMENTATION HERE
@@ -258,8 +258,8 @@ Sharpen(void)
 void R3Mesh::
 SmoothBilateral(void)
 {
-  // Smooth the mesh using a bilateral filter as in 
-  // [Jones et al, Siggraph 2003] or 
+  // Smooth the mesh using a bilateral filter as in
+  // [Jones et al, Siggraph 2003] or
   // [Fleishman et al., Siggraph 2003]
 
   // FILL IN IMPLEMENTATION HERE
@@ -275,11 +275,11 @@ SmoothBilateral(void)
 void R3Mesh::
 Truncate(double t)
 {
-  // For every vertex, create a new vertex a parameter t [0-0.5] 
-  // of the way along each of its N attached edges, and then 
-  // "chop off" the pyramid whose base is formed by the new vertices 
-  // and whose apex is the original vertex, creating a new N-sided 
-  // face covering the hole.  It is OK to assume that the input shape 
+  // For every vertex, create a new vertex a parameter t [0-0.5]
+  // of the way along each of its N attached edges, and then
+  // "chop off" the pyramid whose base is formed by the new vertices
+  // and whose apex is the original vertex, creating a new N-sided
+  // face covering the hole.  It is OK to assume that the input shape
   // is convex for this feature.
 
   // FILL IN IMPLEMENTATION HERE
@@ -295,12 +295,12 @@ Truncate(double t)
 void R3Mesh::
 Bevel(double t)
 {
-  // For every edge, create a new face whose vertices are t [0-1] 
-  // of the way along each of its attached edges.  This requires 
-  // first truncating all vertices by t, creating new vertices t [0-1] 
-  // of the way along each of new edges, and then "chopping off" a 
+  // For every edge, create a new face whose vertices are t [0-1]
+  // of the way along each of its attached edges.  This requires
+  // first truncating all vertices by t, creating new vertices t [0-1]
+  // of the way along each of new edges, and then "chopping off" a
   // prism for each of the original edges, creating a new face
-  // to triangulate the hole created for each edge.  It is OK to assume 
+  // to triangulate the hole created for each edge.  It is OK to assume
   // that the input shape is convex for this feature.
 
   // FILL IN IMPLEMENTATION HERE
@@ -317,7 +317,7 @@ void R3Mesh::
 SplitFaces(void)
 {
   // Split every face into K+1 faces (where K is the number of vertices on the face).
-  // Creating a new vertex at the midpoint of every edge, 
+  // Creating a new vertex at the midpoint of every edge,
   // remove the original face, create a new face connnecting all the new vertices,
   // and create new triangular faces connecting each vertex of the original face
   // with the new vertices associated with its adjacent edges.
@@ -335,12 +335,12 @@ void R3Mesh::
 StarFaces(double factor)
 {
   // Split every face into N faces (where N is the number of vertices on the face).
-  // That is, create a new vertex at the centroid of the face, 
-  // remove the original face, 
+  // That is, create a new vertex at the centroid of the face,
+  // remove the original face,
   // create N new triangular faces connecting the new
   // vertex with each pair of adjacent vertices of the original face.
   // Position the new vertex at a point that is offset from the centroid
-  // of the face along the normal vector by a distance equal to factor 
+  // of the face along the normal vector by a distance equal to factor
   // times the average edge length for the face.
 
   // FILL IN IMPLEMENTATION HERE
@@ -355,11 +355,11 @@ StarFaces(double factor)
 void R3Mesh::
 SplitLongEdges(double max_edge_length)
 {
-  // Iteratively split edges longer than max_edge_length.  
-  // Note that every edge split produces a new vertex at the 
-  // edge midpoint and replaces the two adjacent faces with four.  
-  // Edges  should be split repeatedly until there is none longer 
-  // than the given threshold.  Note: an extra point will be given if 
+  // Iteratively split edges longer than max_edge_length.
+  // Note that every edge split produces a new vertex at the
+  // edge midpoint and replaces the two adjacent faces with four.
+  // Edges  should be split repeatedly until there is none longer
+  // than the given threshold.  Note: an extra point will be given if
   // longer edges are split first (which produces better shaped faces).
 
   // FILL IN IMPLEMENTATION HERE
@@ -375,12 +375,12 @@ SplitLongEdges(double max_edge_length)
 void R3Mesh::
 CollapseShortEdges(double min_edge_length)
 {
-  // Iteratively collapse edges shorter than min_edge_length.  
-  // Note that every edge collapse merges two vertices into one 
-  // and removes up to two faces (if the adjacent faces are triangles).  
-  // Place the new vertex at the midpoint 
-  // of the collapsed edge.  Note: an extra point will be given if 
-  // shorter edges are collapsed first (which produces better 
+  // Iteratively collapse edges shorter than min_edge_length.
+  // Note that every edge collapse merges two vertices into one
+  // and removes up to two faces (if the adjacent faces are triangles).
+  // Place the new vertex at the midpoint
+  // of the collapsed edge.  Note: an extra point will be given if
+  // shorter edges are collapsed first (which produces better
   // shaped faces).
 
   // FILL IN IMPLEMENTATION HERE
@@ -396,12 +396,12 @@ CollapseShortEdges(double min_edge_length)
 void R3Mesh::
 ClusterVertices(double grid_cell_size)
 {
-  // Simplify the mesh by clustering vertices residing in the same 
-  // cell of a grid defined by x, y, and z spacing parameters.  
-  // All vertices within the same grid cell should be merged 
-  // into a single vertex, that vertex should be placed at the 
-  // centroid of the cluster vertices, and all edges and faces 
-  // that collapse as a result of the vertex merging should be removed. 
+  // Simplify the mesh by clustering vertices residing in the same
+  // cell of a grid defined by x, y, and z spacing parameters.
+  // All vertices within the same grid cell should be merged
+  // into a single vertex, that vertex should be placed at the
+  // centroid of the cluster vertices, and all edges and faces
+  // that collapse as a result of the vertex merging should be removed.
 
   // FILL IN IMPLEMENTATION HERE
   fprintf(stderr, "ClusterVertices not implemented\n");
@@ -461,7 +461,7 @@ void R3Mesh::
 SubdivideLoop(void)
 {
   // Subdivide every face using the method in SplitFaces.
-  // Then, update the positions of all vertices according to the Loop subdivision weights.  
+  // Then, update the positions of all vertices according to the Loop subdivision weights.
   // This only must work correctly for meshes with triangular faces.
 
   // FILL IN IMPLEMENTATION HERE
@@ -476,10 +476,10 @@ SubdivideLoop(void)
 void R3Mesh::
 SubdivideCatmullClark(void)
 {
-  // Subdivide every N-sided face into N quads by creating a new vertex in the center of 
-  // every face connected to new vertices at the center of every edge, and then update 
-  // the positions of all vertices according to the Catmull-Clark subdivision weights. 
-  // This only must work correctly for meshes with quadrilateral faces. 
+  // Subdivide every N-sided face into N quads by creating a new vertex in the center of
+  // every face connected to new vertices at the center of every edge, and then update
+  // the positions of all vertices according to the Catmull-Clark subdivision weights.
+  // This only must work correctly for meshes with quadrilateral faces.
 
   // FILL IN IMPLEMENTATION HERE
   fprintf(stderr, "SubdivideCatmullClark not implemented\n");
@@ -491,16 +491,16 @@ SubdivideCatmullClark(void)
 
 
 void R3Mesh::
-SurfaceOfRevolution(const R3Mesh& profile_curve, 
+SurfaceOfRevolution(const R3Mesh& profile_curve,
   const R3Line& axis_of_revolution, double rotation_angle_step)
 {
-  // Add new vertices and faces to the mesh by sweeping a profile curve 
-  // around an axis of revolution.  The vertices representing the profile 
-  // curve are provided in the passed mesh file (take the vertices of the 
-  // mesh in order and ignore the faces).  The axis of revolution and 
-  // rotation  angle step size are provided in the arguments.  New vertices 
-  // should be created by successively rotating the original vertices around 
-  // the axis by the step size and new faces should be constructed by 
+  // Add new vertices and faces to the mesh by sweeping a profile curve
+  // around an axis of revolution.  The vertices representing the profile
+  // curve are provided in the passed mesh file (take the vertices of the
+  // mesh in order and ignore the faces).  The axis of revolution and
+  // rotation  angle step size are provided in the arguments.  New vertices
+  // should be created by successively rotating the original vertices around
+  // the axis by the step size and new faces should be constructed by
   // connecting adjacent vertices to create a surface of revolution.
 
   // FILL IN IMPLEMENTATION HERE
@@ -515,16 +515,16 @@ SurfaceOfRevolution(const R3Mesh& profile_curve,
 void R3Mesh::
 SurfaceSweep(const R3Mesh& crosssection_polygon, const R3Mesh& centerline_curve)
 {
-  // Create new vertices and faces by sweeping a polygon along a curve.  
-  // The vertices representing a cross-section polygon are provided in 
-  // the first input mesh file, and the vertices representing the sweep 
-  // centerline curve are provided in the second mesh file (for both, take 
-  // the vertices of the meshes in order and ignore the faces).  New vertices 
-  // should be created by successively translating and rotating the vertices 
-  // of the cross-section polygon to match the position and orientation of 
-  // vertices/edges in the centerline, and new faces should be constructed 
-  // by connecting adjacent vertices created during the sweep.  
-  // Note: an extra 3 points will be awarded if your implementation avoids 
+  // Create new vertices and faces by sweeping a polygon along a curve.
+  // The vertices representing a cross-section polygon are provided in
+  // the first input mesh file, and the vertices representing the sweep
+  // centerline curve are provided in the second mesh file (for both, take
+  // the vertices of the meshes in order and ignore the faces).  New vertices
+  // should be created by successively translating and rotating the vertices
+  // of the cross-section polygon to match the position and orientation of
+  // vertices/edges in the centerline, and new faces should be constructed
+  // by connecting adjacent vertices created during the sweep.
+  // Note: an extra 3 points will be awarded if your implementation avoids
   // self-intersecting polygons in all cases.
 
   // FILL IN IMPLEMENTATION HERE
@@ -540,10 +540,10 @@ SurfaceSweep(const R3Mesh& crosssection_polygon, const R3Mesh& centerline_curve)
 void R3Mesh::
 FixHoles(void)
 {
-  // Create faces covering the holes of a mesh by connecting vertices 
-  // on the boundary of every hole.  You should completely cover the hole, 
-  // while doing your best to produce well-shaped faces 
-  // (e.g., by connecting closer vertices first).  
+  // Create faces covering the holes of a mesh by connecting vertices
+  // on the boundary of every hole.  You should completely cover the hole,
+  // while doing your best to produce well-shaped faces
+  // (e.g., by connecting closer vertices first).
 
   // FILL IN IMPLEMENTATION HERE
   fprintf(stderr, "FixHoles not implemented\n");
@@ -558,7 +558,7 @@ FixHoles(void)
 void R3Mesh::
 FixCracks(double epsilon)
 {
-  // Merge boundary vertices and edges within a specified 
+  // Merge boundary vertices and edges within a specified
   // distance (epsilon) of one another.
 
   // FILL IN IMPLEMENTATION HERE
@@ -574,8 +574,8 @@ FixCracks(double epsilon)
 void R3Mesh::
 FixIntersections(void)
 {
-  // Insert edges at face-face intersections and discard 
-  // the smaller part of the mesh "pinched" off by new edge loops.  
+  // Insert edges at face-face intersections and discard
+  // the smaller part of the mesh "pinched" off by new edge loops.
   // Note: this is hard.
 
   // FILL IN IMPLEMENTATION HERE
@@ -591,11 +591,11 @@ FixIntersections(void)
 void R3Mesh::
 Intersect(const R3Mesh& mesh)
 {
-  // Intersect the solid implied by this mesh with another, 
+  // Intersect the solid implied by this mesh with another,
   // keeping only the faces enclosing the intersection of the two solids.
-  // This feature requires introducing edges at every face intersection 
-  // and removing parts of the mesh that lie in the exterior of the 
-  // solid object implied by either of the two meshes. 
+  // This feature requires introducing edges at every face intersection
+  // and removing parts of the mesh that lie in the exterior of the
+  // solid object implied by either of the two meshes.
 
   // FILL IN IMPLEMENTATION HERE
   fprintf(stderr, "Intersect not implemented\n");
@@ -610,10 +610,10 @@ Intersect(const R3Mesh& mesh)
 void R3Mesh::
 Subtract(const R3Mesh& mesh)
 {
-  // Subtract the solid implied by this mesh with another, 
+  // Subtract the solid implied by this mesh with another,
   // keeping only the faces enclosing the difference of the two solids.
-  // This feature requires introducing edges at every face intersection 
-  // and removing parts of the mesh that lie in the interior of the 
+  // This feature requires introducing edges at every face intersection
+  // and removing parts of the mesh that lie in the interior of the
   // solid object implied by the passed mesh.
 
   // FILL IN IMPLEMENTATION HERE
@@ -629,11 +629,11 @@ Subtract(const R3Mesh& mesh)
 void R3Mesh::
 Union(const R3Mesh& mesh)
 {
-  // Union  the solid implied by this mesh with another, 
+  // Union  the solid implied by this mesh with another,
   // keeping only the faces enclosing the union of the two solids.
-  // This feature requires introducing edges at every face intersection 
-  // and removing parts of the mesh that lie in the interior of the 
-  // solid object implied by both of the two meshes. 
+  // This feature requires introducing edges at every face intersection
+  // and removing parts of the mesh that lie in the interior of the
+  // solid object implied by both of the two meshes.
 
   // FILL IN IMPLEMENTATION HERE
   fprintf(stderr, "Union not implemented\n");
@@ -648,8 +648,8 @@ Union(const R3Mesh& mesh)
 void R3Mesh::
 Crop(const R3Plane& plane)
 {
-  // Crop the input mesh to the positive side of the plane.  
-  // This feature requires clipping each polygon crossing the plane, 
+  // Crop the input mesh to the positive side of the plane.
+  // This feature requires clipping each polygon crossing the plane,
   // and discarding any part of any face on the negative side of the plane.
 
   // FILL IN IMPLEMENTATION HERE
@@ -859,17 +859,17 @@ Read(const char *filename)
 
   // Read file of appropriate type
   int status = 0;
-  if (!strncmp(extension, ".ray", 4)) 
+  if (!strncmp(extension, ".ray", 4))
     status = ReadRay(filename);
-  else if (!strncmp(extension, ".off", 4)) 
+  else if (!strncmp(extension, ".off", 4))
     status = ReadOff(filename);
-  else if (!strncmp(extension, ".jpg", 4)) 
+  else if (!strncmp(extension, ".jpg", 4))
     status = ReadImage(filename);
-  else if (!strncmp(extension, ".jpeg", 4)) 
+  else if (!strncmp(extension, ".jpeg", 4))
     status = ReadImage(filename);
-  else if (!strncmp(extension, ".bmp", 4)) 
+  else if (!strncmp(extension, ".bmp", 4))
     status = ReadImage(filename);
-  else if (!strncmp(extension, ".ppm", 4)) 
+  else if (!strncmp(extension, ".ppm", 4))
     status = ReadImage(filename);
   else {
     fprintf(stderr, "Unable to read file %s (unrecognized extension: %s)\n", filename, extension);
@@ -896,9 +896,9 @@ Write(const char *filename)
   }
 
   // Write file of appropriate type
-  if (!strncmp(extension, ".ray", 4)) 
+  if (!strncmp(extension, ".ray", 4))
     return WriteRay(filename);
-  else if (!strncmp(extension, ".off", 4)) 
+  else if (!strncmp(extension, ".off", 4))
     return WriteOff(filename);
   else {
     fprintf(stderr, "Unable to write file %s (unrecognized extension: %s)", filename, extension);
@@ -915,10 +915,10 @@ Write(const char *filename)
 int R3Mesh::
 ReadImage(const char *filename)
 {
-  // Create a mesh by reading an image file, 
-  // constructing vertices at (x,y,luminance), 
-  // and connecting adjacent pixels into faces. 
-  // That is, the image is interpretted as a height field, 
+  // Create a mesh by reading an image file,
+  // constructing vertices at (x,y,luminance),
+  // and connecting adjacent pixels into faces.
+  // That is, the image is interpretted as a height field,
   // where the luminance of each pixel provides its z-coordinate.
 
   // Read image
@@ -1034,7 +1034,7 @@ ReadOff(const char *filename)
       vertex_count++;
     }
     else if (face_count < nfaces) {
-      // Read number of vertices in face 
+      // Read number of vertices in face
       int face_nverts = 0;
       bufferp = strtok(bufferp, " \t");
       if (bufferp) face_nverts = atoi(bufferp);
@@ -1075,13 +1075,13 @@ ReadOff(const char *filename)
 
   // Check whether read all vertices
   if ((vertex_count != nverts) || (NVertices() < nverts)) {
-    fprintf(stderr, "Expected %d vertices, but read %d vertex lines and created %d vertices in file %s\n", 
+    fprintf(stderr, "Expected %d vertices, but read %d vertex lines and created %d vertices in file %s\n",
       nverts, vertex_count, NVertices(), filename);
   }
 
   // Check whether read all faces
   if ((face_count != nfaces) || (NFaces() < nfaces)) {
-    fprintf(stderr, "Expected %d faces, but read %d face lines and created %d faces in file %s\n", 
+    fprintf(stderr, "Expected %d faces, but read %d face lines and created %d faces in file %s\n",
       nfaces, face_count, NFaces(), filename);
   }
 
@@ -1199,7 +1199,7 @@ ReadRay(const char *filename)
       // Increment polygon counter
       polygon_count++;
     }
-	
+
     // Increment command number
     command_number++;
   }
@@ -1229,7 +1229,7 @@ WriteRay(const char *filename)
     const R3Point& p = vertex->position;
     const R3Vector& n = vertex->normal;
     const R2Point& t = vertex->texcoords;
-    fprintf(fp, "#vertex %g %g %g  %g %g %g  %g %g\n", p.X(), p.Y(), p.Z(), 
+    fprintf(fp, "#vertex %g %g %g  %g %g %g  %g %g\n", p.X(), p.Y(), p.Z(),
       n.X(), n.Y(), n.Z(), t.X(), t.Y());
     vertex->id = i;
   }
@@ -1286,7 +1286,7 @@ R3MeshVertex(const R3MeshVertex& vertex)
 
 R3MeshVertex::
 R3MeshVertex(const R3Point& position, const R3Vector& normal, const R2Point& texcoords)
-  : position(position),                    
+  : position(position),
     normal(normal),
     texcoords(texcoords),
     curvature(0),
@@ -1321,9 +1321,9 @@ UpdateNormal(void)
   // second.  To do it, you must design a data structure that allows O(K)
   // access to faces attached to each vertex, where K is the number of faces attached
   // to the vertex.  Then, to compute the normal for a vertex,
-  // you should take a weighted average of the normals for the attached faces, 
+  // you should take a weighted average of the normals for the attached faces,
   // where the weights are determined by the areas of the faces.
-  // Store the resulting normal in the "normal"  variable associated with the vertex. 
+  // Store the resulting normal in the "normal"  variable associated with the vertex.
   // You can display the computed normals by hitting the 'N' key in meshview.
 
   // FILL IN IMPLEMENTATION HERE (THIS IS REQUIRED)
@@ -1336,9 +1336,9 @@ UpdateNormal(void)
 void R3MeshVertex::
 UpdateCurvature(void)
 {
-  // Compute an estimate of the Gauss curvature of the surface 
-  // using a method based on the Gauss Bonet Theorem, which is described in 
-  // [Akleman, 2006]. Store the result in the "curvature"  variable. 
+  // Compute an estimate of the Gauss curvature of the surface
+  // using a method based on the Gauss Bonet Theorem, which is described in
+  // [Akleman, 2006]. Store the result in the "curvature"  variable.
 
   // FILL IN IMPLEMENTATION HERE
   // fprintf(stderr, "Update vertex curvature not implemented\n");
@@ -1431,17 +1431,17 @@ UpdatePlane(void)
 {
   // Check number of vertices
   int nvertices = vertices.size();
-  if (nvertices < 3) { 
-    plane = R3null_plane; 
-    return; 
+  if (nvertices < 3) {
+    plane = R3null_plane;
+    return;
   }
 
   // Compute centroid
   R3Point centroid = R3zero_point;
-  for (int i = 0; i < nvertices; i++) 
+  for (int i = 0; i < nvertices; i++)
     centroid += vertices[i]->position;
   centroid /= nvertices;
-  
+
   // Compute best normal for counter-clockwise array of vertices using newell's method
   R3Vector normal = R3zero_vector;
   const R3Point *p1 = &(vertices[nvertices-1]->position);
@@ -1452,10 +1452,10 @@ UpdatePlane(void)
     normal[2] += (p1->X() - p2->X()) * (p1->Y() + p2->Y());
     p1 = p2;
   }
-  
+
   // Normalize normal vector
   normal.Normalize();
-  
+
   // Update face plane
   plane.Reset(centroid, normal);
 }

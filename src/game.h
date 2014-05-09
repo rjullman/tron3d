@@ -48,7 +48,7 @@ Player(void)
   mesh.Rotate(M_PI/2, axisx);
   R3Line axisz(middle, R3zaxis_vector, true);
   mesh.Rotate(M_PI, axisz);
-  mesh.Translate(-2,-0.3,0);
+  mesh.Translate(0,-0.3,0);
 }
 ////////////////////////////////////////////////////////////
 // Game API

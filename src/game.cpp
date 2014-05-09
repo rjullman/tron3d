@@ -42,13 +42,14 @@ void UpdateCamera(Player *player) {
               x+dx, y+dy,  1.0f,
               0.0f, 0.0f,  1.0f);
 
+   // Follow player
    float angle = acos(R3xaxis_vector.Dot(player->direction));
    angle *= 180.0 / M_PI;
    if (player->direction.Y() < 0.0)
      angle = 360 - angle;
 
-   // Follow player
-   glColor3f(1.0f, 0.2f, 0.2f);
+   glEnable(GL_COLOR_MATERIAL);
+   glColor3f(0.5f, 0.4f, 0.0f);
    glTranslatef(player->position.X(), player->position.Y(), 0.0f);
    glRotatef(angle, 0.0f, 0.0f, 1.0f);
    //glutSolidCube(0.8f);
@@ -56,6 +57,7 @@ void UpdateCamera(Player *player) {
    player->mesh.Draw();
    glRotatef(-angle, 0.0f, 0.0f, 1.0f);
    glTranslatef(-(player->position.X()), -(player->position.Y()),0.0f);
+   glDisable(GL_COLOR_MATERIAL);
 }
 
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
