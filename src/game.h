@@ -32,9 +32,13 @@ struct Player {
 inline Player::
 Player(void)
    : position(R3Point(0,0,0)),
+<<<<<<< HEAD
      direction(R3Vector(1.0f, 0.0f, 0.0f)),
      turn(NOT_TURNING)
 {
+=======
+     direction(R3Vector(1.0f, 0.0f, 0.0f)) {
+>>>>>>> 319e21c8242cea75bf293ece1365e7d991de3beb
 }
 
 ////////////////////////////////////////////////////////////
