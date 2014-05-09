@@ -79,8 +79,8 @@ static double GetTime(void)
     // Return time since start
     LARGE_INTEGER current_timevalue;
     QueryPerformanceCounter(&current_timevalue);
-    return ((double) current_timevalue.QuadPart - 
-            (double) start_timevalue.QuadPart) / 
+    return ((double) current_timevalue.QuadPart -
+            (double) start_timevalue.QuadPart) /
             (double) timefreq.QuadPart;
   }
 #else
@@ -106,7 +106,11 @@ static double GetTime(void)
 #endif
 }
 
+///////////
+// Function Declarations
+//////////
 
+void GLUTStop(void);
 
 ////////////////////////////////////////////////////////////
 // SCENE DRAWING CODE
@@ -125,9 +129,11 @@ void DrawGame(R3Scene *scene)
   double delta_time = current_time - previous_time;
 
   // Move players
-  UpdatePlayers(scene, delta_time);
+  bool collision_check = UpdatePlayers(scene, delta_time);
+  if (!collision_check)
+    GLUTStop();
 
-  // Updsate player point of view
+  // Update player point of view
   UpdateCamera();
 
   // Remember previous time
@@ -571,7 +577,7 @@ void GLUTInit(int *argc, char **argv)
    glutReshapeFunc(GLUTResize);
    glutDisplayFunc(GLUTRedraw);
    glutKeyboardFunc(GLUTKeyboard);
-   glutIgnoreKeyRepeat(1);   
+   glutIgnoreKeyRepeat(1);
    glutSpecialFunc(GLUTSpecial);
    glutSpecialUpFunc(GLUTKeyboadRelease);
 

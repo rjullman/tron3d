@@ -33,16 +33,41 @@ void UpdateCamera() {
    float y = player.position.Y();
    float dx = player.direction.X();
    float dy = player.direction.Y();
+
    gluLookAt(	x, y, 1.0f,
               x+dx, y+dy,  1.0f,
               0.0f, 0.0f,  1.0f);
 }
 
-void UpdatePlayers(R3Scene *scene, double delta_time) {
+bool UpdatePlayers(R3Scene *scene, double delta_time) {
    // Turn the player
    player.direction.Rotate(R3zaxis_vector, player.turn * TURN_ANGLE);
    // Move the player
    player.position += player.direction * PLAYER_SPEED * delta_time * 0.1f;
+
+   // Check if inside boundaries
+   float x = player.position.X();
+   float y = player.position.Y();
+   if (x <= -23 || x >= 23 || y <= -23 || y >= 23) {
+    return false;
+   }
+
+   // Check for collisions with scene
+   /*
+   ////// Kill collisions (head on)
+   R3Ray kill_ray(player.position, player.direction, normalized=true);
+   if (CheckForSceneCollisions(scene, kill_ray).hit)
+    return false;
+
+   ////// On top of object collisions (beneath)
+   R3Ray top_ray(player.position, R3Vector(0,0,-1), normalized=true);
+   if (CheckForSceneCollisions(scene, top_ray).hit && CheckForSceneCollisions(scene, top_ray).position.Z() > 0.1)
+    player.position.SetZ(4.0f);
+   else
+    player.position.SetZ(1.0f);
+    */
+
+  return true;
 }
 
 void ToggleMovePlayer(int turn_dir) {
