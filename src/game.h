@@ -23,7 +23,7 @@ struct Player {
 
 inline Player::
 Player(void)
-   : position(R3Point()),
+   : position(R3Point(0,0,0)),
      direction(R3Vector(1.0f, 0.0f, 0.0f)) {
 }
 
