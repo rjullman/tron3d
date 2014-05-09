@@ -50,8 +50,89 @@ enum {
 
 
 ////////////////////////////////////////////////////////////
+// TIMER CODE
+////////////////////////////////////////////////////////////
+
+#ifdef _WIN32
+#  include <windows.h>
+#else
+#  include <sys/time.h>
+#endif
+
+static double GetTime(void)
+{
+#ifdef _WIN32
+  // Return number of seconds since start of execution
+  static int first = 1;
+  static LARGE_INTEGER timefreq;
+  static LARGE_INTEGER start_timevalue;
+
+  // Check if this is the first time
+  if (first) {
+    // Initialize first time
+    QueryPerformanceFrequency(&timefreq);
+    QueryPerformanceCounter(&start_timevalue);
+    first = 0;
+    return 0;
+  }
+  else {
+    // Return time since start
+    LARGE_INTEGER current_timevalue;
+    QueryPerformanceCounter(&current_timevalue);
+    return ((double) current_timevalue.QuadPart - 
+            (double) start_timevalue.QuadPart) / 
+            (double) timefreq.QuadPart;
+  }
+#else
+  // Return number of seconds since start of execution
+  static int first = 1;
+  static struct timeval start_timevalue;
+
+  // Check if this is the first time
+  if (first) {
+    // Initialize first time
+    gettimeofday(&start_timevalue, NULL);
+    first = 0;
+    return 0;
+  }
+  else {
+    // Return time since start
+    struct timeval current_timevalue;
+    gettimeofday(&current_timevalue, NULL);
+    int secs = current_timevalue.tv_sec - start_timevalue.tv_sec;
+    int usecs = current_timevalue.tv_usec - start_timevalue.tv_usec;
+    return (double) (secs + 1.0E-6F * usecs);
+  }
+#endif
+}
+
+
+
+////////////////////////////////////////////////////////////
 // SCENE DRAWING CODE
 ////////////////////////////////////////////////////////////
+
+void DrawGame(R3Scene *scene)
+{
+  // Get current time (in seconds) since start of execution
+  double current_time = GetTime();
+  static double previous_time = 0;
+
+  // program just started up?
+  if (previous_time == 0) previous_time = current_time;
+
+  // time passed since starting
+  double delta_time = current_time - previous_time;
+
+  // Move players
+  UpdatePlayers(scene, delta_time);
+
+  // Updsate player point of view
+  UpdateCamera();
+
+  // Remember previous time
+  previous_time = current_time;
+}
 
 void DrawShape(R3Shape *shape)
 {
@@ -393,8 +474,8 @@ void GLUTRedraw(void)
    glClearColor(background[0], background[1], background[2], background[3]);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   // Load camera
-   GameUpdate();
+   // Draws the game
+   DrawGame(scene);
 
    // Load scene lights
    LoadLights(scene);
@@ -416,14 +497,10 @@ void GLUTRedraw(void)
 
 void GLUTSpecial(int key, int x, int y)
 {
-   // Invert y coordinate
-   y = GLUTwindow_height - y;
-
    // Process keyboard button event
    switch (key) {
-      case GLUT_KEY_UP : MoveForward(); break;
-      case GLUT_KEY_LEFT : MoveLeft(); break;
-      case GLUT_KEY_RIGHT : MoveRight(); break;
+      case GLUT_KEY_LEFT : ToggleMovePlayer(TURNING_LEFT); break;
+      case GLUT_KEY_RIGHT : ToggleMovePlayer(TURNING_RIGHT); break;
    }
 
    // Redraw
@@ -431,12 +508,8 @@ void GLUTSpecial(int key, int x, int y)
 }
 
 
-
 void GLUTKeyboard(unsigned char key, int x, int y)
 {
-   // Invert y coordinate
-   y = GLUTwindow_height - y;
-
    // Process keyboard button event
    switch (key) {
       case 'B':
@@ -455,6 +528,17 @@ void GLUTKeyboard(unsigned char key, int x, int y)
    glutPostRedisplay();
 }
 
+
+void GLUTKeyboadRelease(int key, int x, int y) {
+   // Process keyboard button event
+   switch (key) {
+      case GLUT_KEY_LEFT : ToggleMovePlayer(TURNING_LEFT); break;
+      case GLUT_KEY_RIGHT : ToggleMovePlayer(TURNING_RIGHT); break;
+   }
+
+   // Redraw
+   glutPostRedisplay();
+}
 
 
 void GLUTCommand(int cmd)
@@ -487,8 +571,9 @@ void GLUTInit(int *argc, char **argv)
    glutReshapeFunc(GLUTResize);
    glutDisplayFunc(GLUTRedraw);
    glutKeyboardFunc(GLUTKeyboard);
-   glutIgnoreKeyRepeat(1);
+   glutIgnoreKeyRepeat(1);   
    glutSpecialFunc(GLUTSpecial);
+   glutSpecialUpFunc(GLUTKeyboadRelease);
 
    // Initialize graphics modes
    glEnable(GL_NORMALIZE);

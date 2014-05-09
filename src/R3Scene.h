@@ -1,3 +1,7 @@
+#ifndef R3SCENE_H
+#define R3SCENE_H
+
+
 // Include file for the R3 scene stuff
 
 #define R3Rgb R2Pixel
@@ -291,4 +295,4 @@ ParticleSpring(int k) const
 }
 
 
-
+#endif
