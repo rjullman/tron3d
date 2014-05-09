@@ -39,10 +39,10 @@ endif
 # on its corresponding .cpp), as are many of the compilation rules.
 #
 
-OBJS=golf.o # R3Scene.o
+OBJS=tron.o R3Scene.o
 LIBS=R3/libR3.a R2/libR2.a jpeg/libjpeg.a fglut/libfglut.a
 
-all: golf
+all: tron
 
 R3/libR3.a:
 	    $(MAKE) -C R3
@@ -56,12 +56,12 @@ jpeg/libjpeg.a:
 fglut/libfglut.a:
 	$(MAKE) -C fglut
 
-golf: $(OBJS) $(LIBS)
+tron: $(OBJS) $(LIBS)
 	    rm -f $@
 	    $(CXX) $(CXXFLAGS) $^ -lm -o $@ $(GLLIBS)
 
 clean:
-	    rm -f *.o golf
+	    rm -f *.o tron
 		$(MAKE) -C R3 clean
 		$(MAKE) -C R2 clean
 		$(MAKE) -C jpeg clean
