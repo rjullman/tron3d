@@ -39,7 +39,7 @@ endif
 # on its corresponding .cpp), as are many of the compilation rules.
 #
 
-OBJS=tron.o R3Scene.o
+OBJS=tron.o game.o R3Scene.o
 LIBS=R3/libR3.a R2/libR2.a jpeg/libjpeg.a fglut/libfglut.a
 
 all: tron
