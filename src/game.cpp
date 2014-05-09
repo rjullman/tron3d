@@ -37,6 +37,12 @@ void UpdateCamera() {
    gluLookAt(	x, y, 1.0f,
               x+dx, y+dy,  1.0f,
               0.0f, 0.0f,  1.0f);
+
+   R3Point front = player.position + 4 * player.direction;
+   glColor3f(1.0f, 0.2f, 0.2f);
+   glTranslatef(front.X(), front.Y(), 0.0f);
+   glutSolidCube(0.8f);
+   glTranslatef(-(front.X()), -(front.Y()), 0.0f);
 }
 
 bool UpdatePlayers(R3Scene *scene, double delta_time) {
