@@ -27,6 +27,7 @@ struct Player {
 
    R3Point position;
    R3Vector direction;
+   bool dead;
    int turn;
 };
 
@@ -34,6 +35,7 @@ inline Player::
 Player(void)
    : position(R3Point(0,0,0)),
      direction(R3Vector(1.0f, 0.0f, 0.0f)),
+     dead(false),
      turn(NOT_TURNING)
 {
 }
@@ -42,12 +44,11 @@ Player(void)
 // Game API
 ////////////////////////////////////////////////////////////
 
-void InitLevel(void);
+void InitLevel(int num_players);
 void GameUpdate(void);
-void UpdateCamera(void);
-bool UpdatePlayers(R3Scene *scene, double delta_time);
+void UpdateCamera(Player *player);
+void UpdatePlayer(R3Scene *scene, Player *player, double delta_time);
 
-
-void ToggleMovePlayer(int turn_dir);
+void ToggleMovePlayer(Player *player, int turn_dir);
 
 #endif

@@ -23,6 +23,11 @@
 static char *input_scene_name = NULL;
 
 
+// Game state variables
+
+vector<Player> players;
+static bool gameover = false;
+
 
 // Display variables
 
@@ -128,13 +133,20 @@ void DrawGame(R3Scene *scene)
   // time passed since starting
   double delta_time = current_time - previous_time;
 
-  // Move players
-  bool collision_check = UpdatePlayers(scene, delta_time);
-  if (!collision_check)
-    GLUTStop();
+  int living = 0;
+  for (unsigned int i = 0; i < players.size(); i++) {
+     if (players[i].dead) { continue; }
+     living++;
 
-  // Update player point of view
-  UpdateCamera();
+     // Move players
+     UpdatePlayer(scene, &players[i], delta_time);
+
+     // Update player point of view
+     UpdateCamera(&players[i]);
+  }
+
+  // Gameover when only one player remaining
+  gameover = (living <= 1);
 
   // Remember previous time
   previous_time = current_time;
@@ -483,6 +495,8 @@ void GLUTRedraw(void)
    // Draws the game
    DrawGame(scene);
 
+//   GLUTDrawText(R3Point(0,0,0), "THIS IS A TEST A WHAT A TEST");
+
    // Load scene lights
    LoadLights(scene);
 
@@ -505,8 +519,8 @@ void GLUTSpecial(int key, int x, int y)
 {
    // Process keyboard button event
    switch (key) {
-      case GLUT_KEY_LEFT : ToggleMovePlayer(TURNING_LEFT); break;
-      case GLUT_KEY_RIGHT : ToggleMovePlayer(TURNING_RIGHT); break;
+      case GLUT_KEY_LEFT : ToggleMovePlayer(&players[0], TURNING_LEFT); break;
+      case GLUT_KEY_RIGHT : ToggleMovePlayer(&players[0], TURNING_RIGHT); break;
    }
 
    // Redraw
@@ -538,8 +552,8 @@ void GLUTKeyboard(unsigned char key, int x, int y)
 void GLUTKeyboadRelease(int key, int x, int y) {
    // Process keyboard button event
    switch (key) {
-      case GLUT_KEY_LEFT : ToggleMovePlayer(TURNING_LEFT); break;
-      case GLUT_KEY_RIGHT : ToggleMovePlayer(TURNING_RIGHT); break;
+      case GLUT_KEY_LEFT : ToggleMovePlayer(&players[0], TURNING_LEFT); break;
+      case GLUT_KEY_RIGHT : ToggleMovePlayer(&players[0], TURNING_RIGHT); break;
    }
 
    // Redraw
@@ -588,7 +602,7 @@ void GLUTInit(int *argc, char **argv)
    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 
    // Initialize game
-   InitLevel();
+   InitLevel(1);
 }
 
 
@@ -651,7 +665,7 @@ ParseArgs(int argc, char **argv)
 
    // Check input_scene_name
    if (!input_scene_name || print_usage) {
-      printf("Usage: particleview <level.scn>\n");
+      printf("Usage: tron <level.scn>\n");
       return 0;
    }
 
