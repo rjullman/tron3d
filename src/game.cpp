@@ -29,8 +29,9 @@ void UpdateCamera() {
    gluPerspective(2*180.0*0.25/M_PI, (GLdouble) 1, 0.01, 10000);
 
    // Set the camera direction
-   float x = player.position.X();
-   float y = player.position.Y();
+   R3Point eye = player.position - 4 * player.direction;
+   float x = eye.X();
+   float y = eye.Y();
    float dx = player.direction.X();
    float dy = player.direction.Y();
 
@@ -38,11 +39,18 @@ void UpdateCamera() {
               x+dx, y+dy,  1.0f,
               0.0f, 0.0f,  1.0f);
 
-   R3Point front = player.position + 4 * player.direction;
+   float angle = acos(R3xaxis_vector.Dot(player.direction));
+   angle *= 180.0 / M_PI;
+   if (player.direction.Y() < 0.0)
+     angle = 360 - angle;
+
+   // Follow player
    glColor3f(1.0f, 0.2f, 0.2f);
-   glTranslatef(front.X(), front.Y(), 0.0f);
+   glTranslatef(player.position.X(), player.position.Y(), 0.0f);
+   glRotatef(angle, 0.0f, 0.0f, 1.0f);
    glutSolidCube(0.8f);
-   glTranslatef(-(front.X()), -(front.Y()), 0.0f);
+   glRotatef(-angle, 0.0f, 0.0f, 1.0f);
+   glTranslatef(-(player.position.X()), -(player.position.Y()),0.0f);
 }
 
 bool UpdatePlayers(R3Scene *scene, double delta_time) {
