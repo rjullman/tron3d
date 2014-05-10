@@ -44,7 +44,7 @@ vector<Player> players;
 static bool gameover = true;
 
 int num_humans = 1;
-int num_ai = 0;
+int num_ai = 3;
 
 // Display variables
 

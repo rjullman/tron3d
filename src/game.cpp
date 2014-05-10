@@ -55,7 +55,7 @@ void InitGame() {
 void InitLevel(int human_players, int ai_players) {
    players.clear();
    for (int i = 0; i < human_players + ai_players; i++) {
-      bool ai = i < (ai_players);
+      bool ai = i >= (human_players);
       players.push_back(Player(ai));
    }
 }
