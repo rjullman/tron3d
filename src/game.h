@@ -49,6 +49,6 @@ void GameUpdate(void);
 void UpdateCamera(Player *player);
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time);
 
-void ToggleMovePlayer(Player *player, int turn_dir);
+void ToggleMovePlayer(int player_num, int turn_dir);
 
 #endif

@@ -108,7 +108,10 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
    // On death set player->dead = true
 }
 
-void ToggleMovePlayer(Player *player, int turn_dir) {
-   if (player->turn == turn_dir) { player->turn = NOT_TURNING; }
-   else { player->turn = turn_dir; }
+void ToggleMovePlayer(int player_num, int turn_dir) {
+   if (player_num >= players.size()) { return; }
+   if (players[player_num].turn == turn_dir) { 
+      players[player_num].turn = NOT_TURNING;
+   }
+   else { players[player_num].turn = turn_dir; }
 }

@@ -25,7 +25,7 @@ static char *input_scene_name = NULL;
 
 // Menu variables
 
-enum { MAIN_MENU };
+enum { MAIN_MENU, OPTIONS_MENU };
 int menu = MAIN_MENU;
 int menu_option = 0;
 
@@ -37,6 +37,24 @@ enum {
    NUM_MAIN_MENU_ITEMS
 };
 
+static const char* options_menu_text[] = {
+   "PLAYERS:   %d",
+   "P1 LEFT:     %s",
+   "P1 RIGHT:  %s",
+   "P2 LEFT:     %s",
+   "P2 RIGHT:  %s",
+   "BACK"
+};
+enum {
+   NUM_PLAYERS_SELECTED,
+   PLAYER_1_LEFT_SELECTED,
+   PLAYER_1_RIGHT_SELECTED,
+   PLAYER_2_LEFT_SELECTED,
+   PLAYER_2_RIGHT_SELECTED,
+   BACK_SELECTED,
+   NUM_OPTIONS_MENU_ITEMS
+};
+
 
 // Game variables
 
@@ -44,7 +62,7 @@ vector<Player> players;
 static bool gameover = true;
 
 int num_humans = 1;
-int num_ai = 3;
+int num_ai = 0;
 
 // Display variables
 
@@ -135,7 +153,15 @@ static double GetTime(void)
 void GLUTStop(void);
 
 ////////////////////////////////////////////////////////////
-// GAME DRAWING CODE
+// GAME STATE
+////////////////////////////////////////////////////////////
+
+bool Playing() {
+   return !gameover;
+}
+
+////////////////////////////////////////////////////////////
+// GAME DRAWING
 ////////////////////////////////////////////////////////////
 
 void LoadLights(R3Scene *scene);
@@ -201,6 +227,48 @@ void DrawMenu()
    switch (menu) {
       case MAIN_MENU:
 	 DrawMenuHelper(main_menu_text, NUM_MAIN_MENU_ITEMS);
+	 break;
+      case OPTIONS_MENU:
+	 int MAX_LINE_LEN = 50;
+
+	 // Created formatted options
+	 char** formatted = new char *[NUM_OPTIONS_MENU_ITEMS];
+	 for (int i = 0; i < NUM_OPTIONS_MENU_ITEMS; i++) {
+	    char* s = new char[MAX_LINE_LEN];
+	    const char* cur = options_menu_text[i];
+	    switch (i) {
+	       case NUM_PLAYERS_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, cur, num_humans);
+		  break;
+	       case PLAYER_1_LEFT_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, cur, "<-");
+		  break;
+	       case PLAYER_1_RIGHT_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, cur, "->");
+		  break;
+	       case PLAYER_2_LEFT_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, cur, "a");
+		  break;
+	       case PLAYER_2_RIGHT_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, cur, "d");
+		  break;
+	       case BACK_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, "%s", cur);
+
+	    }
+	    formatted[i] = s;
+	 }
+
+	 // Draw formatted menu
+	 DrawMenuHelper((const char**) formatted, NUM_OPTIONS_MENU_ITEMS);
+
+	 // Clean up
+	 for (int i = 0; i < NUM_OPTIONS_MENU_ITEMS; i++) {
+	    delete[] formatted[i];
+	 }
+	 delete[] formatted;
+
+	 break;
    }
 }
 
@@ -608,7 +676,7 @@ void GLUTRedraw(void)
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    // Menu
-   if (gameover) {
+   if (!Playing()) {
       DrawMenu();
    }
    // Game
@@ -640,13 +708,22 @@ void GLUTSpecial(int key, int x, int y)
       case GLUT_KEY_DOWN:
 	 menu_option++; break;
       case GLUT_KEY_LEFT :
-	 ToggleMovePlayer(&players[0], TURNING_LEFT); break;
+	 if (Playing())
+	    ToggleMovePlayer(0, TURNING_LEFT);
+	 break;
       case GLUT_KEY_RIGHT :
-	 ToggleMovePlayer(&players[0], TURNING_RIGHT); break;
+	 if (Playing())
+	    ToggleMovePlayer(0, TURNING_RIGHT);
+	 break;
    }
 
    // Redraw
    glutPostRedisplay();
+}
+
+void SwitchMenu(int new_menu) {
+   menu = new_menu;
+   menu_option = 0;
 }
 
 // Handles all option toggling
@@ -660,10 +737,27 @@ void GLUTEnterPressed() {
 	       gameover = false;
 	       break;
 	    case OPTIONS_SELECTED:
+	       SwitchMenu(OPTIONS_MENU);
 	       break;
 	    case QUIT_SELECTED:
 	       quit = 1;
 	       break;
+	 }
+	 break;
+	
+      case OPTIONS_MENU:
+	 switch (menu_option) {
+	       case NUM_PLAYERS_SELECTED:
+		  num_humans = 3 - num_humans;
+		  break;
+	       case BACK_SELECTED:
+		  SwitchMenu(MAIN_MENU);
+		  break;
+	       case PLAYER_1_LEFT_SELECTED:
+	       case PLAYER_1_RIGHT_SELECTED:
+	       case PLAYER_2_LEFT_SELECTED:
+	       case PLAYER_2_RIGHT_SELECTED:
+		  break;
 	 }
 	 break;
    }
@@ -675,12 +769,14 @@ void GLUTKeyboard(unsigned char key, int x, int y)
    switch (key) {
       case 'A':
       case 'a':
-	 ToggleMovePlayer(&players[1], TURNING_LEFT);
+	 if (Playing())
+	    ToggleMovePlayer(1, TURNING_LEFT);
 	 break;
 
       case 'D':
       case 'd':
-	 ToggleMovePlayer(&players[1], TURNING_RIGHT);
+	 if (Playing())
+	    ToggleMovePlayer(1, TURNING_RIGHT);
 	 break;
 
       case 'B':
@@ -708,12 +804,14 @@ void GLUTKeyboardRelease(unsigned char key, int x, int y) {
    switch (key) {
       case 'A':
       case 'a':
-	 ToggleMovePlayer(&players[1], TURNING_LEFT); 
+	 if (Playing())
+	    ToggleMovePlayer(1, TURNING_LEFT); 
 	 break;
 
       case 'D':
       case 'd':
-	 ToggleMovePlayer(&players[1], TURNING_RIGHT); 
+	 if (Playing())
+	    ToggleMovePlayer(1, TURNING_RIGHT); 
 	 break;
    }
 
@@ -725,11 +823,13 @@ void GLUTSpecialRelease(int key, int x, int y) {
    // Process keyboard button event
    switch (key) {
       case GLUT_KEY_LEFT:
-	 ToggleMovePlayer(&players[0], TURNING_LEFT); 
+	 if (Playing())
+	    ToggleMovePlayer(0, TURNING_LEFT); 
 	 break;
 
       case GLUT_KEY_RIGHT:
-	 ToggleMovePlayer(&players[0], TURNING_RIGHT); 
+	 if (Playing())
+	    ToggleMovePlayer(0, TURNING_RIGHT); 
 	 break;
    }
 
