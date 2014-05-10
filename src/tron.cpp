@@ -43,6 +43,8 @@ enum {
 vector<Player> players;
 static bool gameover = true;
 
+int num_humans = 1;
+int num_ai = 0;
 
 // Display variables
 
@@ -136,6 +138,9 @@ void GLUTStop(void);
 // GAME DRAWING CODE
 ////////////////////////////////////////////////////////////
 
+void LoadLights(R3Scene *scene);
+void DrawScene(R3Scene *scene);
+
 void DrawMenuText(const char *text, bool select, double px, double py) {
 	 // Disable lighting
 	 GLboolean lighting = glIsEnabled(GL_LIGHTING);
@@ -199,7 +204,38 @@ void DrawMenu()
    }
 }
 
-void DrawGame(R3Scene *scene)
+void SetupViewport(int player_num, int total_players) {
+   switch(total_players) {
+      case 1:
+	 glViewport(0, 0, GLUTwindow_width, GLUTwindow_height);
+	 break;
+      case 2:
+	 int y = player_num == 0 ? GLUTwindow_width/2 : 0;
+	 glViewport(0, y, GLUTwindow_width, GLUTwindow_height/2);
+	 break;
+   }
+}
+
+void DrawGame(R3Scene *scene) 
+{
+
+   int viewports_drawn = 0;
+   for (unsigned int i = 0; i < players.size(); i++) {
+      if (players[i].IsAI()) { continue; }
+      
+      // Setup the viewport 
+      SetupViewport(viewports_drawn++, num_humans);
+      
+      // Update player point of view
+      UpdateCamera(&players[i]);
+     
+      // Draw scene surfaces
+      glEnable(GL_LIGHTING);
+      DrawScene(scene);
+   }
+}
+
+void UpdateGame(R3Scene *scene)
 {
   // Get current time (in seconds) since start of execution
   double current_time = GetTime();
@@ -218,9 +254,6 @@ void DrawGame(R3Scene *scene)
 
      // Move players
      UpdatePlayer(scene, &players[i], delta_time);
-
-     // Update player point of view
-     UpdateCamera(&players[i]);
   }
 
   // Gameover when only one player remaining
@@ -574,21 +607,18 @@ void GLUTRedraw(void)
    glClearColor(background[0], background[1], background[2], background[3]);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   // Draw Menu
+   // Menu
    if (gameover) {
       DrawMenu();
    }
-   // Draw Game
+   // Game
    else {
+      UpdateGame(scene);
       DrawGame(scene);
-
-      // Load scene lights
-      LoadLights(scene);
-
-      // Draw scene surfaces
-      glEnable(GL_LIGHTING);
-      DrawScene(scene);
    }
+
+   // Load scene lights
+   LoadLights(scene);
 
    // Quit here so that can save image before exit
    if (quit) {
@@ -626,7 +656,7 @@ void GLUTEnterPressed() {
 	 switch (menu_option) {
 	    case START_GAME_SELECTED:
 	       // Initialize game
-	       InitLevel(1);
+	       InitLevel(num_humans, num_ai);
 	       gameover = false;
 	       break;
 	    case OPTIONS_SELECTED:
@@ -643,14 +673,24 @@ void GLUTKeyboard(unsigned char key, int x, int y)
 {
    // Process keyboard button event
    switch (key) {
-      case 13: // ENTER
-	 GLUTEnterPressed();
-	 break;	 
+      case 'A':
+      case 'a':
+	 ToggleMovePlayer(&players[1], TURNING_LEFT);
+	 break;
+
+      case 'D':
+      case 'd':
+	 ToggleMovePlayer(&players[1], TURNING_RIGHT);
+	 break;
 
       case 'B':
       case 'b':
          show_bboxes = !show_bboxes;
          break;
+
+      case 13: // ENTER
+	 GLUTEnterPressed();
+	 break;	 
 
       case 'Q':
       case 'q':
@@ -663,12 +703,34 @@ void GLUTKeyboard(unsigned char key, int x, int y)
    glutPostRedisplay();
 }
 
-
-void GLUTKeyboadRelease(int key, int x, int y) {
+void GLUTKeyboardRelease(unsigned char key, int x, int y) {
    // Process keyboard button event
    switch (key) {
-      case GLUT_KEY_LEFT : ToggleMovePlayer(&players[0], TURNING_LEFT); break;
-      case GLUT_KEY_RIGHT : ToggleMovePlayer(&players[0], TURNING_RIGHT); break;
+      case 'A':
+      case 'a':
+	 ToggleMovePlayer(&players[1], TURNING_LEFT); 
+	 break;
+
+      case 'D':
+      case 'd':
+	 ToggleMovePlayer(&players[1], TURNING_RIGHT); 
+	 break;
+   }
+
+   // Redraw
+   glutPostRedisplay();
+}
+
+void GLUTSpecialRelease(int key, int x, int y) {
+   // Process keyboard button event
+   switch (key) {
+      case GLUT_KEY_LEFT:
+	 ToggleMovePlayer(&players[0], TURNING_LEFT); 
+	 break;
+
+      case GLUT_KEY_RIGHT:
+	 ToggleMovePlayer(&players[0], TURNING_RIGHT); 
+	 break;
    }
 
    // Redraw
@@ -706,15 +768,19 @@ void GLUTInit(int *argc, char **argv)
    glutReshapeFunc(GLUTResize);
    glutDisplayFunc(GLUTRedraw);
    glutKeyboardFunc(GLUTKeyboard);
+   glutKeyboardUpFunc(GLUTKeyboardRelease);
    glutIgnoreKeyRepeat(1);
    glutSpecialFunc(GLUTSpecial);
-   glutSpecialUpFunc(GLUTKeyboadRelease);
+   glutSpecialUpFunc(GLUTSpecialRelease);
 
    // Initialize graphics modes
    glEnable(GL_NORMALIZE);
    glEnable(GL_LIGHTING);
    glEnable(GL_DEPTH_TEST);
    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+
+   // Initialize game
+   InitGame();
 }
 
 

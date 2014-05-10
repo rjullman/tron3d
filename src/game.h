@@ -12,7 +12,7 @@
 
 
 ////////////////////////////////////////////////////////////
-// Player Defintiion
+// PLAYER DEFINITION
 ////////////////////////////////////////////////////////////
 
 enum {
@@ -22,39 +22,29 @@ enum {
 };
 
 struct Player {
- public:
-   Player(void);
-
-   R3Point position;
-   R3Vector direction;
-   R3Mesh mesh;
-   bool dead;
-   int turn;
+   public:
+      Player(bool is_ai);
+      
+      bool IsAI();
+      
+      R3Point position;
+      R3Vector direction;
+      R3Mesh *mesh;
+      bool dead;
+      bool is_ai;
+      int turn;
 };
 
-inline Player::
-Player(void)
-   : position(R3Point(0,0,0)),
-     direction(R3Vector(1.0f, 0.0f, 0.0f)),
-     mesh(R3Mesh()),
-     dead(false),
-     turn(NOT_TURNING)
-{
-  mesh.Read("../bikes/m1483.off");
-  R3Point middle(0,0,0);
-  R3Line axisy(middle, R3yaxis_vector, true);
-  mesh.Rotate(-M_PI/2, axisy);
-  R3Line axisx(middle, R3xaxis_vector, true);
-  mesh.Rotate(M_PI/2, axisx);
-  R3Line axisz(middle, R3zaxis_vector, true);
-  mesh.Rotate(M_PI, axisz);
-  mesh.Translate(0,-0.3,0);
-}
+inline bool Player::IsAI() { return is_ai; }
+
+
 ////////////////////////////////////////////////////////////
-// Game API
+// API API
 ////////////////////////////////////////////////////////////
 
-void InitLevel(int num_players);
+void InitGame();
+void InitLevel(int human_players, int ai_players);
+
 void GameUpdate(void);
 void UpdateCamera(Player *player);
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time);

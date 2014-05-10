@@ -8,9 +8,11 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 35.0f;
+static const float PLAYER_SPEED = 20.0f;
 static const float TURN_SPEED = 5.0f;
 
+static const char* BIKE_MESH_LOC = "../bikes/m1483.off";
+R3Mesh bike;
 
 ////////////////////////////////////////////////////////////
 // GLOBAL VARIABLES
@@ -18,10 +20,43 @@ static const float TURN_SPEED = 5.0f;
 
 extern vector<Player> players;
 
-void InitLevel(int num_players) {
+
+////////////////////////////////////////////////////////////
+// PLAYER IMPLEMENTATION
+////////////////////////////////////////////////////////////
+
+Player::
+Player(bool is_ai)
+    : position(R3Point(0,0,0)),
+      direction(R3Vector(1.0f, 0.0f, 0.0f)),
+      mesh(NULL),
+      dead(false),
+      is_ai(is_ai),
+      turn(NOT_TURNING)
+{
+   // Currently no bike mesh options 
+   mesh = &bike;
+}
+
+
+////////////////////////////////////////////////////////////
+// GAME IMPLEMENTATION
+////////////////////////////////////////////////////////////
+
+void InitGame() {
+   // Load bike mesh
+   bike.Read(BIKE_MESH_LOC);
+   bike.Rotate(-M_PI/2, R3yaxis_line);
+   bike.Rotate(M_PI/2, R3xaxis_line);
+   bike.Rotate(M_PI, R3zaxis_line);
+   bike.Translate(0,-0.3,0);
+}
+
+void InitLevel(int human_players, int ai_players) {
    players.clear();
-   for (int i = 0; i < num_players; i++) {
-      players.push_back(Player());
+   for (int i = 0; i < human_players + ai_players; i++) {
+      bool ai = i < (ai_players);
+      players.push_back(Player(ai));
    }
 }
 
@@ -48,15 +83,17 @@ void UpdateCamera(Player *player) {
    if (player->direction.Y() < 0.0)
      angle = 360 - angle;
 
+   // TODO: Set player color
    glEnable(GL_COLOR_MATERIAL);
    glColor3f(0.5f, 0.4f, 0.0f);
+
+   // Display bike
+   glPushMatrix();
    glTranslatef(player->position.X(), player->position.Y(), 0.0f);
    glRotatef(angle, 0.0f, 0.0f, 1.0f);
-   //glutSolidCube(0.8f);
-   //R3Box(-.5,-.5,0,.5,.5,.5).Draw();
-   player->mesh.Draw();
-   glRotatef(-angle, 0.0f, 0.0f, 1.0f);
-   glTranslatef(-(player->position.X()), -(player->position.Y()),0.0f);
+   player->mesh->Draw();
+   glPopMatrix();
+
    glDisable(GL_COLOR_MATERIAL);
 }
 
