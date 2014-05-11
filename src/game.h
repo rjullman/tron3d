@@ -24,9 +24,9 @@ enum {
 struct Player {
    public:
       Player(bool is_ai);
-      
+
       bool IsAI();
-      
+
       R3Point position;
       R3Vector direction;
       R3Mesh *mesh;
@@ -48,6 +48,8 @@ void InitLevel(int human_players, int ai_players);
 void GameUpdate(void);
 void UpdateCamera(Player *player);
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time);
+
+void DrawPlayer(Player *player);
 
 void ToggleMovePlayer(int player_num, int turn_dir);
 
