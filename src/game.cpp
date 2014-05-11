@@ -119,6 +119,6 @@ void ToggleMovePlayer(int player_num, int turn_dir) {
 }
 
 void MovePlayer(int player_num, int turn_dir) {
-   if (player_num >= players.size()) { return; }
+   if ((unsigned int) player_num >= players.size()) { return; }
    players[player_num].turn = turn_dir;
 }
