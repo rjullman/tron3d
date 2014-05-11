@@ -387,12 +387,15 @@ void UpdateGame(R3Scene *scene)
      UpdatePlayer(scene, &players[i], delta_time);
   }
 
-  // Gameover when only one player remaining
-  gameover = (living == 0);
-  if (gameover) { SwitchMenu(MAIN_MENU); }
-
   // Remember previous time
   previous_time = current_time;
+
+  // Gameover when only one player remaining
+  gameover = (living == 0);
+  if (gameover) { 
+     previous_time = 0;
+     SwitchMenu(MAIN_MENU); 
+  }
 }
 
 
@@ -855,6 +858,8 @@ void SwitchMenu(int new_menu) {
 
 // Handles all option toggling
 void GLUTEnterPressed() {
+   if (Playing()) { return; }
+
    switch (menu) {
       case MAIN_MENU:
 	 switch (menu_option) {

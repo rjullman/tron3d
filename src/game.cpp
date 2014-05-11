@@ -8,7 +8,7 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 4.0f;
+static const float PLAYER_SPEED = 20.0f;
 static const float TURN_SPEED = 1.0f;
 static const float PATH_WIDTH = 0.3f;
 
@@ -97,6 +97,11 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
 			    player->turn * TURN_SPEED * delta_time);
    // Move the player
    player->position += player->direction * PLAYER_SPEED * delta_time;
+
+   if (delta_time > 1) {
+   fprintf(stderr, "%g\n", delta_time);
+   fprintf(stderr, "%g %g %g\n", player->position[0], player->position[1], player->position[2]);
+   }
 
    // Continue the trail
    player->trail.push_back(player->position);
