@@ -21,6 +21,7 @@
 // Program arguments
 
 static char *input_scene_name = NULL;
+GLuint texture;
 
 
 // Menu variables
@@ -338,7 +339,6 @@ void SetupViewport(int player_num, int total_players) {
 
 void DrawGame(R3Scene *scene)
 {
-
    int viewports_drawn = 0;
    for (unsigned int i = 0; i < players.size(); i++) {
       if (players[i].IsAI()) { continue; }
@@ -398,10 +398,70 @@ void UpdateGame(R3Scene *scene)
 // SCENE DRAWING CODE
 ////////////////////////////////////////////////////////////
 
+
+// load a 256x256 RGB .RAW file as a texture
+GLuint LoadTextureRaw( const char * filename, int wrap )
+{
+    GLuint texture;
+    int width, height;
+    char * data;
+    FILE * file;
+
+    // open texture data
+    file = fopen( filename, "rb" );
+    if ( file == NULL ) return 0;
+
+    // allocate buffer
+    width = 420;
+    height = 420;
+    data = (char*)malloc( width * height * 3 );
+
+    // read texture data
+    fread( data, width * height * 3, 1, file );
+    fclose( file );
+
+    // allocate a texture name
+    glGenTextures( 1, &texture );
+
+    // select our current texture
+    glBindTexture( GL_TEXTURE_2D, texture );
+
+    // select modulate to mix texture with color for shading
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+
+    // when texture area is small, bilinear filter the closest mipmap
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                     GL_LINEAR_MIPMAP_NEAREST );
+    // when texture area is large, bilinear filter the first mipmap
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+    // if wrap is true, the texture wraps over at the edges (repeat)
+    //       ... false, the texture ends at the edges (clamp)
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                     wrap ? GL_REPEAT : GL_CLAMP );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+                     wrap ? GL_REPEAT : GL_CLAMP );
+
+    // build our texture mipmaps
+    gluBuild2DMipmaps( GL_TEXTURE_2D, 3, width, height,
+                       GL_RGB, GL_UNSIGNED_BYTE, data );
+
+    // free buffer
+    free( data );
+
+    return texture;
+}
+
 void DrawShape(R3Shape *shape)
 {
    // Check shape type
-   if (shape->type == R3_BOX_SHAPE) shape->box->Draw();
+
+   if (shape->type == R3_BOX_SHAPE) {
+    glEnable( GL_TEXTURE_2D );
+   glBindTexture( GL_TEXTURE_2D, texture);
+    shape->box->Draw();
+    glDisable( GL_TEXTURE_2D );
+  }
    else if (shape->type == R3_SPHERE_SHAPE) shape->sphere->Draw();
    else if (shape->type == R3_CYLINDER_SHAPE) shape->cylinder->Draw();
    else if (shape->type == R3_CONE_SHAPE) shape->cone->Draw();
@@ -632,6 +692,7 @@ void DrawNode(R3Scene *scene, R3Node *node)
    if (node->material) LoadMaterial(node->material);
 
    // Draw shape
+
    if (node->shape) DrawShape(node->shape);
 
    // Draw children nodes
@@ -935,6 +996,7 @@ void GLUTInit(int *argc, char **argv)
    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 
    // Initialize game
+  texture = LoadTextureRaw("../textures/grid.bmp", 1);
    InitGame();
 }
 
