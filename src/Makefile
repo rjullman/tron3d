@@ -25,8 +25,10 @@ else
     endif
     ifeq ($(UNAME_S),Darwin)
         IRRLIB = irrKlang/libirrklang.dylib
+        MP3LIB = irrKlang/ikpMP3.dylib
         IRRLIBPATH = /usr/local/lib/
         RMIRR = /usr/local/lib/libirrklang.dylib
+        RMMP3 = /usr/local/lib/ikpMP3.dylib
     endif
 endif
 
@@ -71,6 +73,14 @@ LIBS=R3/libR3.a R2/libR2.a jpeg/libjpeg.a fglut/libfglut.a
 
 all: tron
 
+setup:
+	cp $(MP3LIB) $(IRRLIBPATH)
+	cp $(IRRLIB) $(IRRLIBPATH)
+
+unsetup:
+	rm -i $(RMIRR)
+	rm -i $(RMMP3)
+
 R3/libR3.a:
 	    $(MAKE) -C R3
 
@@ -97,9 +107,4 @@ clean:
 
 distclean:  clean
 
-setup:
-	cp $(IRRLIB) $(IRRLIBPATH)
-
-unsetup:
-	rm -i $(RMIRR)
 
