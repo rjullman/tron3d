@@ -62,8 +62,10 @@ enum {
 vector<Player> players;
 static bool gameover = true;
 
-int num_humans = 1;
-int num_ai = 0;
+static int num_humans = 1;
+static int num_ai = 0;
+
+static double game_start_time = 0;
 
 // Display variables
 
@@ -312,7 +314,7 @@ void DrawGameText() {
    glLoadIdentity();
    renderBitmapString(5,30,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
-   sprintf(s,"Round Duration: %f", GetTime());
+   sprintf(s,"Round Duration: %f", GetTime() - game_start_time);
    renderBitmapString(7,50,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
 
@@ -366,6 +368,13 @@ void DrawGame(R3Scene *scene)
    DrawGameText();
 }
 
+void StartGame() {
+   // Initialize game
+   InitLevel(num_humans, num_ai);
+   game_start_time = GetTime();
+   gameover = false;
+}
+
 void UpdateGame(R3Scene *scene)
 {
   // Get current time (in seconds) since start of execution
@@ -387,12 +396,15 @@ void UpdateGame(R3Scene *scene)
      UpdatePlayer(scene, &players[i], delta_time);
   }
 
-  // Gameover when only one player remaining
-  gameover = (living == 0);
-  if (gameover) { SwitchMenu(MAIN_MENU); }
-
   // Remember previous time
   previous_time = current_time;
+
+  // Gameover when only one player remaining
+  gameover = (living == 0);
+  if (gameover) { 
+     previous_time = 0;
+     SwitchMenu(MAIN_MENU); 
+  }
 }
 
 
@@ -855,13 +867,13 @@ void SwitchMenu(int new_menu) {
 
 // Handles all option toggling
 void GLUTEnterPressed() {
+   if (Playing()) { return; }
+
    switch (menu) {
       case MAIN_MENU:
 	 switch (menu_option) {
 	    case START_GAME_SELECTED:
-	       // Initialize game
-	       InitLevel(num_humans, num_ai);
-	       gameover = false;
+	       StartGame();
 	       break;
 	    case OPTIONS_SELECTED:
 	       SwitchMenu(OPTIONS_MENU);
@@ -999,7 +1011,7 @@ void GLUTInit(int *argc, char **argv)
    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 
    // Initialize game
-  texture = LoadTextureRaw("../textures/grid.bmp", 1);
+   texture = LoadTextureRaw("../textures/grid.bmp", 1);
    InitGame();
 }
 

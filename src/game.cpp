@@ -8,7 +8,7 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 4.0f;
+static const float PLAYER_SPEED = 5.0f;
 static const float TURN_SPEED = 1.0f;
 static const float PATH_WIDTH = 0.3f;
 
