@@ -5,6 +5,12 @@
 CXX=g++
 CXXFLAGS=-Wall -I. -g -DUSE_JPEG
 
+#stuff for irrKlang if it doesnt work
+#install_name_tool -change @load_path/libirrklang.dylib /Users/vinay/Desktop/cos426-final/cos426-final/src tron
+#  export DYLD_LIBRARY_PATH=/desktop/cos426-final/cos426-final/src
+# ⚡ echo $DYLD_LIBRARY_PATH
+
+
 
 
 #
@@ -41,6 +47,8 @@ endif
 
 OBJS=tron.o game.o R3Scene.o
 LIBS=R3/libR3.a R2/libR2.a jpeg/libjpeg.a fglut/libfglut.a
+IRR := libirrklang.dylib
+
 
 all: tron
 
@@ -58,7 +66,7 @@ fglut/libfglut.a:
 
 tron: $(OBJS) $(LIBS)
 	    rm -f $@
-	    $(CXX) $(CXXFLAGS) $^ -lm -o $@ $(GLLIBS)
+	    $(CXX) $(CXXFLAGS) $^ -lm -o $@ $(GLLIBS) $(IRR)
 
 clean:
 	    rm -f *.o tron

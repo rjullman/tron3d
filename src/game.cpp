@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////
 
 #include "game.h"
+#include "irrKlang/include/irrKlang.h"
 
 ////////////////////////////////////////////////////////////
 // GLOBAL CONSTANTS
@@ -57,6 +58,8 @@ Player(Color color, bool is_ai, R3Point position, R3Vector direction)
 
 void InitGame() {
    // Load bike mesh
+   irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
+   engine->play2D("ridindirty.mp3", true);
    bike.Read(BIKE_MESH_LOC);
    bike.Translate(-0.19,0,0);
    bike.Rotate(-M_PI/2, R3yaxis_line);
