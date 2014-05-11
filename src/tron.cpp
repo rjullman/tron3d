@@ -360,6 +360,9 @@ void DrawGame(R3Scene *scene)
       }
    }
 
+   // Return to full screen viewport
+   glViewport(0, 0, GLUTwindow_width, GLUTwindow_height);
+
    DrawGameText();
 }
 
