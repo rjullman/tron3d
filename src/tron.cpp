@@ -294,7 +294,7 @@ void DrawGameText() {
    // Disable lighting
    GLboolean lighting = glIsEnabled(GL_LIGHTING);
    glDisable(GL_LIGHTING);
-   
+
    // Save matrices
    glMatrixMode(GL_PROJECTION);
    glPushMatrix();
@@ -355,7 +355,7 @@ void DrawGame(R3Scene *scene)
       // Draw players
       for (unsigned int i = 0; i < players.size(); i++) {
         DrawPlayer(&players[i]);
-	DrawTrail(&players[i]);
+	      DrawTrail(&players[i]);
       }
    }
 
