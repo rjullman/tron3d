@@ -9,6 +9,8 @@
 #include "R3/R3.h"
 #include "R3Scene.h"
 #include "fglut/fglut.h"
+#include "OpenAL/al.h"
+//#include "OpenAL/alut.h"
 
 
 ////////////////////////////////////////////////////////////

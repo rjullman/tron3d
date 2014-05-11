@@ -12,7 +12,6 @@
 #include "game.h"
 #include "fglut/fglut.h"
 
-
 ///////////////////////////////////////////////////////////
 // GLOBAL VARIABLES
 ////////////////////////////////////////////////////////////
@@ -358,6 +357,7 @@ void DrawGame(R3Scene *scene)
         DrawPlayer(&players[i]);
 	      DrawTrail(&players[i]);
       }
+    }
 
    DrawGameText();
 }
@@ -1080,6 +1080,9 @@ main(int argc, char **argv)
 
    // Initialize GLUT
    GLUTInit(&argc, argv);
+
+   // Initialize OpenAL
+   //alutInit(&argc, argv);
 
    // Read scene
    scene = ReadScene(input_scene_name);
