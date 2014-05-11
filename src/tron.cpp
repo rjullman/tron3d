@@ -61,8 +61,10 @@ enum {
 vector<Player> players;
 static bool gameover = true;
 
-int num_humans = 1;
-int num_ai = 0;
+static int num_humans = 1;
+static int num_ai = 0;
+
+static double game_start_time = 0;
 
 // Display variables
 
@@ -170,6 +172,10 @@ void renderBitmapString(
 
 void GLUTStop(void);
 
+void LoadLights(R3Scene *scene);
+void DrawScene(R3Scene *scene);
+void SwitchMenu(int new_menu);
+
 ////////////////////////////////////////////////////////////
 // GAME STATE
 ////////////////////////////////////////////////////////////
@@ -182,49 +188,46 @@ bool Playing() {
 // GAME DRAWING
 ////////////////////////////////////////////////////////////
 
-void LoadLights(R3Scene *scene);
-void DrawScene(R3Scene *scene);
-
 void DrawMenuText(const char *text, bool select, double px, double py) {
-	 // Disable lighting
-	 GLboolean lighting = glIsEnabled(GL_LIGHTING);
-	 glDisable(GL_LIGHTING);
+   // Disable lighting
+   GLboolean lighting = glIsEnabled(GL_LIGHTING);
+   glDisable(GL_LIGHTING);
 
-	 // Save matrices and setup projection
-	 glMatrixMode(GL_PROJECTION);
-	 glPushMatrix();
-	 glLoadIdentity();
-	 gluOrtho2D(0.0, GLUTwindow_width, 0.0, GLUTwindow_height);
-	 glMatrixMode(GL_MODELVIEW);
-	 glPushMatrix();
-	 glLoadIdentity();
-	 glRasterPos2i(px, py);
+   // Save matrices and setup projection
+   glMatrixMode(GL_PROJECTION);
+   glPushMatrix();
+   glLoadIdentity();
+   gluOrtho2D(0.0, GLUTwindow_width, 0.0, GLUTwindow_height);
+   glMatrixMode(GL_MODELVIEW);
+   glPushMatrix();
+   glLoadIdentity();
+   glRasterPos2i(px, py);
 
-	 // Font choice
-	 void * font = GLUT_BITMAP_TIMES_ROMAN_24;
+   // Font choice
+   void * font = GLUT_BITMAP_TIMES_ROMAN_24;
 
-	 // Indicate selecteted char via '*'
-	 if (select) { glutBitmapCharacter(font, '*'); }
-	 int num_spaces = select ? 2 : 4;
-	 for (int i = 0; i < num_spaces; i++)
-	    glutBitmapCharacter(font, ' ');
+   // Indicate selecteted char via '*'
+   if (select) { glutBitmapCharacter(font, '*'); }
+   int num_spaces = select ? 2 : 4;
+   for (int i = 0; i < num_spaces; i++)
+      glutBitmapCharacter(font, ' ');
 
-	 // Display characters
-	 glColor3d(1.0, 1.0, 1.0);
-	 while (*text) {
-	    glutBitmapCharacter(font, *text);
-	    text++;
-	 }
+      // Display characters
+      glColor3d(1.0, 1.0, 1.0);
+      while (*text) {
+	 glutBitmapCharacter(font, *text);
+	 text++;
+      }
 
-	 // Restore matrices
-	 glMatrixMode(GL_MODELVIEW);
-	 glPopMatrix();
-	 glMatrixMode(GL_PROJECTION);
-	 glPopMatrix();
-	 glFlush();
+      // Restore matrices
+      glMatrixMode(GL_MODELVIEW);
+      glPopMatrix();
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glFlush();
 
-	 // Restore lighting
-	 if (lighting) glEnable(GL_LIGHTING);
+      // Restore lighting
+      if (lighting) glEnable(GL_LIGHTING);
 }
 
 void DrawMenuHelper(const char* text[], int items) {
@@ -310,7 +313,7 @@ void DrawGameText() {
    glLoadIdentity();
    renderBitmapString(5,30,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
-   sprintf(s,"Round Duration: %f", GetTime());
+   sprintf(s,"Round Duration: %f", GetTime() - game_start_time);
    renderBitmapString(7,50,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
 
@@ -337,7 +340,6 @@ void SetupViewport(int player_num, int total_players) {
 
 void DrawGame(R3Scene *scene)
 {
-
    int viewports_drawn = 0;
    for (unsigned int i = 0; i < players.size(); i++) {
       if (players[i].IsAI()) { continue; }
@@ -357,9 +359,19 @@ void DrawGame(R3Scene *scene)
         DrawPlayer(&players[i]);
 	      DrawTrail(&players[i]);
       }
-    }
+   }
+
+   // Return to full screen viewport
+   glViewport(0, 0, GLUTwindow_width, GLUTwindow_height);
 
    DrawGameText();
+}
+
+void StartGame() {
+   // Initialize game
+   InitLevel(num_humans, num_ai);
+   game_start_time = GetTime();
+   gameover = false;
 }
 
 void UpdateGame(R3Scene *scene)
@@ -383,11 +395,15 @@ void UpdateGame(R3Scene *scene)
      UpdatePlayer(scene, &players[i], delta_time);
   }
 
-  // Gameover when only one player remaining
-  gameover = (living == 0);
-
   // Remember previous time
   previous_time = current_time;
+
+  // Gameover when only one player remaining
+  gameover = (living == 0);
+  if (gameover) {
+     previous_time = 0;
+     SwitchMenu(MAIN_MENU);
+  }
 }
 
 
@@ -850,13 +866,13 @@ void SwitchMenu(int new_menu) {
 
 // Handles all option toggling
 void GLUTEnterPressed() {
+   if (Playing()) { return; }
+
    switch (menu) {
       case MAIN_MENU:
 	 switch (menu_option) {
 	    case START_GAME_SELECTED:
-	       // Initialize game
-	       InitLevel(num_humans, num_ai);
-	       gameover = false;
+	       StartGame();
 	       break;
 	    case OPTIONS_SELECTED:
 	       SwitchMenu(OPTIONS_MENU);
@@ -994,7 +1010,7 @@ void GLUTInit(int *argc, char **argv)
    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 
    // Initialize game
-  texture = LoadTextureRaw("../textures/grid.bmp", 1);
+   texture = LoadTextureRaw("../textures/grid.bmp", 1);
    InitGame();
 }
 

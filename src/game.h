@@ -12,6 +12,8 @@
 #include "OpenAL/al.h"
 //#include "OpenAL/alut.h"
 
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
 ////////////////////////////////////////////////////////////
 // PLAYER DEFINITION
@@ -23,15 +25,39 @@ enum {
    TURNING_RIGHT = -1
 };
 
+struct Color {
+   public:
+      Color(double R, double G, double B);
+      double R(void);
+      double G(void);
+      double B(void);
+      
+   private:
+      double r;
+      double g;
+      double b;
+};
+
+inline Color::
+Color(double R, double G, double B) : r(R), g(G), b(B) {
+   r = MIN(r, 1.0); r = MAX(r, 0.0);
+   g = MIN(g, 1.0); g = MAX(g, 0.0);
+   b = MIN(b, 1.0); b = MAX(b, 0.0);
+}
+inline double Color::R(void) { return r; }
+inline double Color::G(void) { return g; }
+inline double Color::B(void) { return b; }
+
 struct Player {
    public:
-      Player(bool is_ai);
+      Player(Color color, bool is_ai);
 
       bool IsAI();
 
       R3Point position;
       R3Vector direction;
       R3Mesh *mesh;
+      Color color;
       bool dead;
       bool is_ai;
       int turn;

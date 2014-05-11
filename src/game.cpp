@@ -8,11 +8,18 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 5.0f;
-static const float TURN_SPEED = 1.0f;
+static const float PLAYER_SPEED = 15.0f;
+static const float TURN_SPEED = 3.5f;
 static const float PATH_WIDTH = 0.01f;
 
 static const float TRAIL_DIAMETER = 0.05;
+
+static Color PLAYER_COLORS[] = {
+   Color(1.0,0.5,0.0),
+   Color(0.0,0.0,1.0),
+   Color(0.0,1.0,0.0),
+   Color(1.0,0.0,0.0)
+};
 
 static const char* BIKE_MESH_LOC = "../bikes/m1483.off";
 R3Mesh bike;
@@ -29,10 +36,11 @@ extern vector<Player> players;
 ////////////////////////////////////////////////////////////
 
 Player::
-Player(bool is_ai)
+Player(Color color, bool is_ai)
     : position(R3Point(0,0,0.5)),
       direction(R3Vector(1.0f, 0.0f, 0.0f)),
       mesh(NULL),
+      color(color),
       dead(false),
       is_ai(is_ai),
       turn(NOT_TURNING),
@@ -61,7 +69,7 @@ void InitLevel(int human_players, int ai_players) {
    players.clear();
    for (int i = 0; i < human_players + ai_players; i++) {
       bool ai = i >= (human_players);
-      players.push_back(Player(ai));
+      players.push_back(Player(PLAYER_COLORS[i], ai));
    }
 }
 
@@ -89,6 +97,11 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
 			    player->turn * TURN_SPEED * delta_time);
    // Move the player
    player->position += player->direction * PLAYER_SPEED * delta_time;
+
+   if (delta_time > 1) {
+   fprintf(stderr, "%g\n", delta_time);
+   fprintf(stderr, "%g %g %g\n", player->position[0], player->position[1], player->position[2]);
+   }
 
    // Continue the trail
    player->trail.push_back(player->position);
@@ -178,9 +191,8 @@ void DrawPlayer(Player *player) {
    if (player->direction.Y() < 0.0)
      angle = 360 - angle;
 
-   // TODO: Set player color
    glEnable(GL_COLOR_MATERIAL);
-   glColor3f(0.5f, 0.4f, 0.0f);
+   glColor3d(player->color.R(), player->color.G(), player->color.B());
 
    // Display bike
    glPushMatrix();
@@ -194,6 +206,8 @@ void DrawPlayer(Player *player) {
 }
 
 void DrawTrail(Player *player) {
+//   glColor3d(player->color.R(), player->color.G(), player->color.B());
+
    static GLUquadricObj *glu_sphere = gluNewQuadric();
    gluQuadricTexture(glu_sphere, GL_TRUE);
    gluQuadricNormals(glu_sphere, (GLenum) GLU_SMOOTH);
