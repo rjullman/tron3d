@@ -709,11 +709,11 @@ void GLUTSpecial(int key, int x, int y)
 	 menu_option++; break;
       case GLUT_KEY_LEFT :
 	 if (Playing())
-	    ToggleMovePlayer(0, TURNING_LEFT);
+	    MovePlayer(0, TURNING_LEFT);
 	 break;
       case GLUT_KEY_RIGHT :
 	 if (Playing())
-	    ToggleMovePlayer(0, TURNING_RIGHT);
+	    MovePlayer(0, TURNING_RIGHT);
 	 break;
    }
 
@@ -770,13 +770,13 @@ void GLUTKeyboard(unsigned char key, int x, int y)
       case 'A':
       case 'a':
 	 if (Playing())
-	    ToggleMovePlayer(1, TURNING_LEFT);
+	    MovePlayer(1, TURNING_LEFT);
 	 break;
 
       case 'D':
       case 'd':
 	 if (Playing())
-	    ToggleMovePlayer(1, TURNING_RIGHT);
+	    MovePlayer(1, TURNING_RIGHT);
 	 break;
 
       case 'B':
@@ -804,14 +804,10 @@ void GLUTKeyboardRelease(unsigned char key, int x, int y) {
    switch (key) {
       case 'A':
       case 'a':
-	 if (Playing())
-	    ToggleMovePlayer(1, TURNING_LEFT); 
-	 break;
-
       case 'D':
       case 'd':
 	 if (Playing())
-	    ToggleMovePlayer(1, TURNING_RIGHT); 
+	    MovePlayer(1, NOT_TURNING); 
 	 break;
    }
 
@@ -823,13 +819,9 @@ void GLUTSpecialRelease(int key, int x, int y) {
    // Process keyboard button event
    switch (key) {
       case GLUT_KEY_LEFT:
-	 if (Playing())
-	    ToggleMovePlayer(0, TURNING_LEFT); 
-	 break;
-
       case GLUT_KEY_RIGHT:
 	 if (Playing())
-	    ToggleMovePlayer(0, TURNING_RIGHT); 
+	    MovePlayer(0, NOT_TURNING); 
 	 break;
    }
 
