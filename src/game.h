@@ -33,6 +33,8 @@ struct Player {
       bool dead;
       bool is_ai;
       int turn;
+
+      vector<R3Point> trail;
 };
 
 inline bool Player::IsAI() { return is_ai; }
@@ -50,8 +52,8 @@ void UpdateCamera(Player *player);
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time);
 
 void DrawPlayer(Player *player);
+void DrawTrail(Player *player);
 
-void ToggleMovePlayer(int player_num, int turn_dir);
 void MovePlayer(int player_num, int turn_dir);
 
 #endif

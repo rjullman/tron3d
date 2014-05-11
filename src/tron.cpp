@@ -300,6 +300,7 @@ void DrawGame(R3Scene *scene)
       // Draw players
       for (unsigned int i = 0; i < players.size(); i++) {
         DrawPlayer(&players[i]);
+	DrawTrail(&players[i]);
       }
 
       // Draw scene surfaces
