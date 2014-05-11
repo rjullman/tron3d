@@ -11,6 +11,24 @@ CXXFLAGS=-Wall -I. -g -DUSE_JPEG
 # ⚡ echo $DYLD_LIBRARY_PATH
 
 
+# SELECT APPROPRIATE IRRKLANG LIBRARIES FOR DIFFERENT PLATFORMS                       
+ifeq ($(OS),Windows_NT)                                                  
+    IRRLIB =
+    IRRLIBPATH =
+    RMIRR =
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        IRRLIB = irrklang/libIrrKlang.so
+        IRRLIBPATH = /usr/local/lib/
+        RMIRR = /usr/local/lib/libIrrKlang.so
+    endif
+    ifeq ($(UNAME_S),Darwin)
+        IRRLIB = irrKlang/libirrklang.dylib
+        IRRLIBPATH = /usr/local/lib/
+        RMIRR = /usr/local/lib/libirrklang.dylib
+    endif
+endif
 
 
 #
@@ -47,7 +65,8 @@ endif
 
 OBJS=tron.o game.o R3Scene.o
 LIBS=R3/libR3.a R2/libR2.a jpeg/libjpeg.a fglut/libfglut.a
-IRR := libirrklang.dylib
+# IRR := libirrklang.dylib
+
 
 
 all: tron
@@ -66,7 +85,7 @@ fglut/libfglut.a:
 
 tron: $(OBJS) $(LIBS)
 	    rm -f $@
-	    $(CXX) $(CXXFLAGS) $^ -lm -o $@ $(GLLIBS) $(IRR)
+	    $(CXX) $(CXXFLAGS) $^ -lm -o $@ $(GLLIBS) $(IRRLIB)
 
 clean:
 	    rm -f *.o tron
@@ -77,4 +96,10 @@ clean:
 
 
 distclean:  clean
+
+setup:
+	cp $(IRRLIB) $(IRRLIBPATH)
+
+unsetup:
+	rm -i $(RMIRR)
 
