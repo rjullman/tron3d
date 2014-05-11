@@ -147,6 +147,24 @@ static double GetTime(void)
 #endif
 }
 
+////////////////
+// Typing
+////////////////
+
+void renderBitmapString(
+    float x,
+    float y,
+    float z,
+    void *font,
+    char *string) {
+
+  char *c;
+  glRasterPos3f(x, y,z);
+  for (c=string; *c != '\0'; c++) {
+    glutBitmapCharacter(font, *c);
+  }
+}
+
 ///////////
 // Function Declarations
 //////////
@@ -273,6 +291,39 @@ void DrawMenu()
    }
 }
 
+void DrawGameText() {
+   // Disable lighting
+   GLboolean lighting = glIsEnabled(GL_LIGHTING);
+   glDisable(GL_LIGHTING);
+   
+   // Save matrices
+   glMatrixMode(GL_PROJECTION);
+   glPushMatrix();
+   glLoadIdentity();
+   gluOrtho2D(0, GLUTwindow_width, GLUTwindow_height, 0);
+   glMatrixMode(GL_MODELVIEW);
+
+   // Draw game text
+   glColor3f(1.0f,1.0f,1.0f);
+   char s[50];
+   sprintf(s,"-------  Tron 3D --------");
+   glPushMatrix();
+   glLoadIdentity();
+   renderBitmapString(5,30,0,GLUT_BITMAP_HELVETICA_12,s);
+   glPopMatrix();
+   sprintf(s,"Round Duration: %f", GetTime());
+   renderBitmapString(7,50,0,GLUT_BITMAP_HELVETICA_12,s);
+   glPopMatrix();
+
+   // Restore matrices
+   glMatrixMode(GL_PROJECTION);
+   glPopMatrix();
+   glMatrixMode(GL_MODELVIEW);
+
+   // Restore lighting
+   if (lighting) glEnable(GL_LIGHTING);
+}
+
 void SetupViewport(int player_num, int total_players) {
    switch(total_players) {
       case 1:
@@ -298,16 +349,17 @@ void DrawGame(R3Scene *scene)
       // Update player point of view
       UpdateCamera(&players[i]);
 
-      // Draw players
-      for (unsigned int i = 0; i < players.size(); i++) {
-        DrawPlayer(&players[i]);
-      }
-
-
       // Draw scene surfaces
       glEnable(GL_LIGHTING);
       DrawScene(scene);
-   }
+
+      // Draw players
+      for (unsigned int i = 0; i < players.size(); i++) {
+        DrawPlayer(&players[i]);
+	DrawTrail(&players[i]);
+      }
+
+   DrawGameText();
 }
 
 void UpdateGame(R3Scene *scene)
@@ -337,6 +389,8 @@ void UpdateGame(R3Scene *scene)
   // Remember previous time
   previous_time = current_time;
 }
+
+
 
 ////////////////////////////////////////////////////////////
 // SCENE DRAWING CODE

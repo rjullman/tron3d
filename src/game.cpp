@@ -8,8 +8,11 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 15.0f;
-static const float TURN_SPEED = 5.0f;
+static const float PLAYER_SPEED = 4.0f;
+static const float TURN_SPEED = 1.0f;
+static const float PATH_WIDTH = 0.3f;
+
+static const float TRAIL_DIAMETER = 0.05;
 
 static const char* BIKE_MESH_LOC = "../bikes/m1483.off";
 R3Mesh bike;
@@ -27,12 +30,13 @@ extern vector<Player> players;
 
 Player::
 Player(bool is_ai)
-    : position(R3Point(0,0,0)),
+    : position(R3Point(0,0,0.5)),
       direction(R3Vector(1.0f, 0.0f, 0.0f)),
       mesh(NULL),
       dead(false),
       is_ai(is_ai),
-      turn(NOT_TURNING)
+      turn(NOT_TURNING),
+      trail(vector<R3Point>())
 {
    // Currently no bike mesh options
    mesh = &bike;
@@ -46,10 +50,10 @@ Player(bool is_ai)
 void InitGame() {
    // Load bike mesh
    bike.Read(BIKE_MESH_LOC);
+   bike.Translate(-0.19,0,0);
    bike.Rotate(-M_PI/2, R3yaxis_line);
    bike.Rotate(M_PI/2, R3xaxis_line);
    bike.Rotate(M_PI, R3zaxis_line);
-   bike.Translate(0,-0.3,0);
 }
 
 
@@ -86,8 +90,75 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
    // Move the player
    player->position += player->direction * PLAYER_SPEED * delta_time;
 
-   // TODO: Check for collisions
-   // On death set player->dead = true
+   // Continue the trail
+   player->trail.push_back(player->position);
+
+   // Test for Collisions
+   vector<R3Point> testpoints;
+   testpoints.push_back(player->position + 1.5 * player->direction);
+
+   //R3Vector side_direction = R3zaxis_vector;
+   //side_direction.Cross(player->direction);
+   //testpoints.push_back(player->position + 1.5 * player->direction + 0.3 * side_direction);
+   //testpoints.push_back(player->position + 1.5 * player->direction - 0.3 * side_direction);
+
+   // Check for collisions in scene
+   for (unsigned int i = 0; i < testpoints.size(); i++) {
+      if (Collide_Scene(scene, scene->root, testpoints[i]))
+         player->dead = true;
+      else {
+      // Check for collisions with laid paths
+         for (unsigned int j = 0; j < players.size(); j++) {
+            if (Collide_Trails(&players[j], testpoints[i]))
+               player->dead = true;
+         }
+      }
+   }
+}
+
+bool Collide_Box(R3Scene *scene, R3Node *node, R3Point testpoint) {
+   R3Box scene_box = *node->shape->box;
+
+   if (testpoint.X() >= scene_box.XMin()
+          && testpoint.X() <= scene_box.XMax()
+          && testpoint.Y() >= scene_box.YMin()
+          && testpoint.Y() <= scene_box.YMax()
+          && testpoint.Z() >= scene_box.ZMin()
+          && testpoint.Z() <= scene_box.ZMax())
+      return true;
+   else
+      return false;
+}
+
+bool Collide_Scene(R3Scene *scene, R3Node *node, R3Point testpoint) {
+
+   if (node->shape != NULL && node->shape->type == R3_BOX_SHAPE) {
+      if (Collide_Box(scene, node, testpoint))
+         return true;
+   }
+
+   // Check for collision with children nodes
+   for (unsigned int i = 0; i < node->children.size(); i++) {
+      if (Collide_Scene(scene, node->children[i], testpoint))
+         return true;
+   }
+
+   return false;
+}
+
+bool Collide_Trails(Player *player, R3Point testpoint) {
+   for (unsigned int i = 0; i < player->trail.size(); i++) {
+      if (Collide_Point(testpoint, player->trail[i]))
+         return true;
+   }
+   return false;
+}
+
+bool Collide_Point(R3Point testpoint, R3Point trailpoint) {
+   if (R3Distance(testpoint, trailpoint) <= PATH_WIDTH)
+      return true;
+   else
+      return false;
 }
 
 void DrawPlayer(Player *player) {
@@ -112,15 +183,36 @@ void DrawPlayer(Player *player) {
 
 }
 
-void ToggleMovePlayer(int player_num, int turn_dir) {
-   if ((unsigned int)player_num >= players.size()) { return; }
-   if (players[player_num].turn == turn_dir) {
-      players[player_num].turn = NOT_TURNING;
+void DrawTrail(Player *player) {
+   static GLUquadricObj *glu_sphere = gluNewQuadric();
+   gluQuadricTexture(glu_sphere, GL_TRUE);
+   gluQuadricNormals(glu_sphere, (GLenum) GLU_SMOOTH);
+   gluQuadricDrawStyle(glu_sphere, (GLenum) GLU_FILL);
+
+   for (int i = 1; i < player->trail.size(); i++) {
+      // Make cylinder between p1 and p2
+      // See: http://www.thjsmith.com/40/cylinder-between-two-points-opengl-c
+      R3Point p1 = player->trail[i-1];
+      R3Point p2 = player->trail[i];
+
+      // Compute direction and angle of rotation from standard
+      R3Vector p = (p2 - p1);
+      R3Vector t = R3Vector(R3zaxis_vector);
+      t.Cross(p);
+      double angle = 180 / M_PI * acos (R3zaxis_vector.Dot(p) / p.Length());
+
+      // Draw cylinder
+      glPushMatrix();
+      glTranslated(p1.X(),p1.Y(),p1.Z());
+      glRotated(angle,t.X(),t.Y(),t.Z());
+      gluCylinder(glu_sphere, TRAIL_DIAMETER, TRAIL_DIAMETER, p.Length(), 32, 32);
+      glPopMatrix();
    }
-   else { players[player_num].turn = turn_dir; }
 }
 
 void MovePlayer(int player_num, int turn_dir) {
    if ((unsigned int) player_num >= players.size()) { return; }
    players[player_num].turn = turn_dir;
 }
+
+
