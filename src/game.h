@@ -54,7 +54,7 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time);
 bool Collide_Box(R3Scene *scene, R3Node *node, R3Point testpoint);
 bool Collide_Scene(R3Scene *scene, R3Node *node, R3Point testpoint);
 bool Collide_Trails(Player *player, R3Point testpoint);
-bool Collide_Point(R3Point testpoint, R3Point trailpoint);
+bool Collide_Point(R3Point testpoint, R3Point trailpoint1, R3Point trailpoint2);
 
 void DrawPlayer(Player *player);
 void DrawTrail(Player *player);

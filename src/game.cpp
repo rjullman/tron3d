@@ -8,9 +8,9 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 4.0f;
+static const float PLAYER_SPEED = 5.0f;
 static const float TURN_SPEED = 1.0f;
-static const float PATH_WIDTH = 0.3f;
+static const float PATH_WIDTH = 0.01f;
 
 static const float TRAIL_DIAMETER = 0.05;
 
@@ -94,7 +94,7 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
 
    // Test for Collisions
    vector<R3Point> testpoints;
-   testpoints.push_back(player->position + 1.5 * player->direction);
+   testpoints.push_back(player->position + 1.0 * player->direction);
 
    //R3Vector side_direction = R3zaxis_vector;
    //side_direction.Cross(player->direction);
@@ -146,15 +146,25 @@ bool Collide_Scene(R3Scene *scene, R3Node *node, R3Point testpoint) {
 }
 
 bool Collide_Trails(Player *player, R3Point testpoint) {
-   for (unsigned int i = 0; i < player->trail.size(); i++) {
-      if (Collide_Point(testpoint, player->trail[i]))
+   for (unsigned int i = 1; i < player->trail.size(); i++) {
+      if (Collide_Point(testpoint, player->trail[i-1], player->trail[i]))
          return true;
    }
    return false;
 }
 
-bool Collide_Point(R3Point testpoint, R3Point trailpoint) {
-   if (R3Distance(testpoint, trailpoint) <= PATH_WIDTH)
+bool Collide_Point(R3Point testpoint, R3Point trailpoint1, R3Point trailpoint2) {
+   R3Vector to = trailpoint2 - trailpoint1;
+   R3Vector d = testpoint - trailpoint1;
+
+   R3Vector normal = R3zaxis_vector;
+   normal.Cross(to);
+
+   float distance = (d).Dot(normal);
+
+   R3Point p = testpoint - normal * distance;
+
+   if (distance <= PATH_WIDTH && R3Distance(p, trailpoint1) <= R3Distance(trailpoint1, trailpoint2))
       return true;
    else
       return false;
