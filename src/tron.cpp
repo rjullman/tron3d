@@ -222,7 +222,7 @@ void DrawMenuHelper(const char* text[], int items) {
    }
 }
 
-void DrawMenu()
+void DrawMenu() 
 {
    switch (menu) {
       case MAIN_MENU:
@@ -284,24 +284,19 @@ void SetupViewport(int player_num, int total_players) {
    }
 }
 
-void DrawGame(R3Scene *scene)
+void DrawGame(R3Scene *scene) 
 {
 
    int viewports_drawn = 0;
    for (unsigned int i = 0; i < players.size(); i++) {
       if (players[i].IsAI()) { continue; }
-
-      // Setup the viewport
+      
+      // Setup the viewport 
       SetupViewport(viewports_drawn++, num_humans);
-
+      
       // Update player point of view
       UpdateCamera(&players[i]);
-
-      // Draw players
-      for (unsigned int i = 0; i < players.size(); i++) {
-        DrawPlayer(&players[i]);
-      }
-
+     
       // Draw scene surfaces
       glEnable(GL_LIGHTING);
       DrawScene(scene);
@@ -597,7 +592,6 @@ void DrawScene(R3Scene *scene)
 {
    // Draw nodes recursively
    DrawNode(scene, scene->root);
-
 }
 
 
@@ -715,11 +709,11 @@ void GLUTSpecial(int key, int x, int y)
 	 menu_option++; break;
       case GLUT_KEY_LEFT :
 	 if (Playing())
-	    ToggleMovePlayer(0, TURNING_LEFT);
+	    MovePlayer(0, TURNING_LEFT);
 	 break;
       case GLUT_KEY_RIGHT :
 	 if (Playing())
-	    ToggleMovePlayer(0, TURNING_RIGHT);
+	    MovePlayer(0, TURNING_RIGHT);
 	 break;
    }
 
@@ -750,7 +744,7 @@ void GLUTEnterPressed() {
 	       break;
 	 }
 	 break;
-
+	
       case OPTIONS_MENU:
 	 switch (menu_option) {
 	       case NUM_PLAYERS_SELECTED:
@@ -776,13 +770,13 @@ void GLUTKeyboard(unsigned char key, int x, int y)
       case 'A':
       case 'a':
 	 if (Playing())
-	    ToggleMovePlayer(1, TURNING_LEFT);
+	    MovePlayer(1, TURNING_LEFT);
 	 break;
 
       case 'D':
       case 'd':
 	 if (Playing())
-	    ToggleMovePlayer(1, TURNING_RIGHT);
+	    MovePlayer(1, TURNING_RIGHT);
 	 break;
 
       case 'B':
@@ -792,7 +786,7 @@ void GLUTKeyboard(unsigned char key, int x, int y)
 
       case 13: // ENTER
 	 GLUTEnterPressed();
-	 break;
+	 break;	 
 
       case 'Q':
       case 'q':
@@ -810,14 +804,10 @@ void GLUTKeyboardRelease(unsigned char key, int x, int y) {
    switch (key) {
       case 'A':
       case 'a':
-	 if (Playing())
-	    ToggleMovePlayer(1, TURNING_LEFT);
-	 break;
-
       case 'D':
       case 'd':
 	 if (Playing())
-	    ToggleMovePlayer(1, TURNING_RIGHT);
+	    MovePlayer(1, NOT_TURNING); 
 	 break;
    }
 
@@ -829,13 +819,9 @@ void GLUTSpecialRelease(int key, int x, int y) {
    // Process keyboard button event
    switch (key) {
       case GLUT_KEY_LEFT:
-	 if (Playing())
-	    ToggleMovePlayer(0, TURNING_LEFT);
-	 break;
-
       case GLUT_KEY_RIGHT:
 	 if (Playing())
-	    ToggleMovePlayer(0, TURNING_RIGHT);
+	    MovePlayer(0, NOT_TURNING); 
 	 break;
    }
 

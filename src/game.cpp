@@ -76,25 +76,6 @@ void UpdateCamera(Player *player) {
    gluLookAt(	x, y, 1.0f,
               x+dx, y+dy,  1.0f,
               0.0f, 0.0f,  1.0f);
-
-   /*// Follow player
-   float angle = acos(R3xaxis_vector.Dot(player->direction));
-   angle *= 180.0 / M_PI;
-   if (player->direction.Y() < 0.0)
-     angle = 360 - angle;
-
-   // TODO: Set player color
-   glEnable(GL_COLOR_MATERIAL);
-   glColor3f(0.5f, 0.4f, 0.0f);
-
-   // Display bike
-   glPushMatrix();
-   glTranslatef(player->position.X(), player->position.Y(), 0.0f);
-   glRotatef(angle, 0.0f, 0.0f, 1.0f);
-   player->mesh->Draw();
-   glPopMatrix();
-
-   glDisable(GL_COLOR_MATERIAL);*/
 }
 
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
@@ -135,4 +116,9 @@ void ToggleMovePlayer(int player_num, int turn_dir) {
       players[player_num].turn = NOT_TURNING;
    }
    else { players[player_num].turn = turn_dir; }
+}
+
+void MovePlayer(int player_num, int turn_dir) {
+   if (player_num >= players.size()) { return; }
+   players[player_num].turn = turn_dir;
 }
