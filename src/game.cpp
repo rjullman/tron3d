@@ -14,6 +14,13 @@ static const float PATH_WIDTH = 0.3f;
 
 static const float TRAIL_DIAMETER = 0.05;
 
+static Color PLAYER_COLORS[] = {
+   Color(1.0,0.5,0.0),
+   Color(0.0,0.0,1.0),
+   Color(0.0,1.0,0.0),
+   Color(1.0,0.0,0.0)
+};
+
 static const char* BIKE_MESH_LOC = "../bikes/m1483.off";
 R3Mesh bike;
 
@@ -29,10 +36,11 @@ extern vector<Player> players;
 ////////////////////////////////////////////////////////////
 
 Player::
-Player(bool is_ai)
+Player(Color color, bool is_ai)
     : position(R3Point(0,0,0.5)),
       direction(R3Vector(1.0f, 0.0f, 0.0f)),
       mesh(NULL),
+      color(color),
       dead(false),
       is_ai(is_ai),
       turn(NOT_TURNING),
@@ -60,7 +68,7 @@ void InitLevel(int human_players, int ai_players) {
    players.clear();
    for (int i = 0; i < human_players + ai_players; i++) {
       bool ai = i >= (human_players);
-      players.push_back(Player(ai));
+      players.push_back(Player(PLAYER_COLORS[i], ai));
    }
 }
 
@@ -167,10 +175,9 @@ void DrawPlayer(Player *player) {
    if (player->direction.Y() < 0.0)
      angle = 360 - angle;
 
-   // TODO: Set player color
    glEnable(GL_COLOR_MATERIAL);
-   glColor3f(0.5f, 0.4f, 0.0f);
-
+   glColor3d(player->color.R(), player->color.G(), player->color.B());
+   
    // Display bike
    glPushMatrix();
    glTranslatef(player->position.X(), player->position.Y(), 0.0f);
@@ -182,6 +189,8 @@ void DrawPlayer(Player *player) {
 }
 
 void DrawTrail(Player *player) {
+//   glColor3d(player->color.R(), player->color.G(), player->color.B());
+
    static GLUquadricObj *glu_sphere = gluNewQuadric();
    gluQuadricTexture(glu_sphere, GL_TRUE);
    gluQuadricNormals(glu_sphere, (GLenum) GLU_SMOOTH);

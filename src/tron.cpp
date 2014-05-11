@@ -170,6 +170,10 @@ void renderBitmapString(
 
 void GLUTStop(void);
 
+void LoadLights(R3Scene *scene);
+void DrawScene(R3Scene *scene);
+void SwitchMenu(int new_menu);
+
 ////////////////////////////////////////////////////////////
 // GAME STATE
 ////////////////////////////////////////////////////////////
@@ -182,49 +186,46 @@ bool Playing() {
 // GAME DRAWING
 ////////////////////////////////////////////////////////////
 
-void LoadLights(R3Scene *scene);
-void DrawScene(R3Scene *scene);
-
 void DrawMenuText(const char *text, bool select, double px, double py) {
-	 // Disable lighting
-	 GLboolean lighting = glIsEnabled(GL_LIGHTING);
-	 glDisable(GL_LIGHTING);
+   // Disable lighting
+   GLboolean lighting = glIsEnabled(GL_LIGHTING);
+   glDisable(GL_LIGHTING);
 
-	 // Save matrices and setup projection
-	 glMatrixMode(GL_PROJECTION);
-	 glPushMatrix();
-	 glLoadIdentity();
-	 gluOrtho2D(0.0, GLUTwindow_width, 0.0, GLUTwindow_height);
-	 glMatrixMode(GL_MODELVIEW);
-	 glPushMatrix();
-	 glLoadIdentity();
-	 glRasterPos2i(px, py);
+   // Save matrices and setup projection
+   glMatrixMode(GL_PROJECTION);
+   glPushMatrix();
+   glLoadIdentity();
+   gluOrtho2D(0.0, GLUTwindow_width, 0.0, GLUTwindow_height);
+   glMatrixMode(GL_MODELVIEW);
+   glPushMatrix();
+   glLoadIdentity();
+   glRasterPos2i(px, py);
 
-	 // Font choice
-	 void * font = GLUT_BITMAP_TIMES_ROMAN_24;
+   // Font choice
+   void * font = GLUT_BITMAP_TIMES_ROMAN_24;
 
-	 // Indicate selecteted char via '*'
-	 if (select) { glutBitmapCharacter(font, '*'); }
-	 int num_spaces = select ? 2 : 4;
-	 for (int i = 0; i < num_spaces; i++)
-	    glutBitmapCharacter(font, ' ');
+   // Indicate selecteted char via '*'
+   if (select) { glutBitmapCharacter(font, '*'); }
+   int num_spaces = select ? 2 : 4;
+   for (int i = 0; i < num_spaces; i++)
+      glutBitmapCharacter(font, ' ');
+   
+      // Display characters
+      glColor3d(1.0, 1.0, 1.0);
+      while (*text) {
+	 glutBitmapCharacter(font, *text);
+	 text++;
+      }
 
-	 // Display characters
-	 glColor3d(1.0, 1.0, 1.0);
-	 while (*text) {
-	    glutBitmapCharacter(font, *text);
-	    text++;
-	 }
+      // Restore matrices
+      glMatrixMode(GL_MODELVIEW);
+      glPopMatrix();
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glFlush();
 
-	 // Restore matrices
-	 glMatrixMode(GL_MODELVIEW);
-	 glPopMatrix();
-	 glMatrixMode(GL_PROJECTION);
-	 glPopMatrix();
-	 glFlush();
-
-	 // Restore lighting
-	 if (lighting) glEnable(GL_LIGHTING);
+      // Restore lighting
+      if (lighting) glEnable(GL_LIGHTING);
 }
 
 void DrawMenuHelper(const char* text[], int items) {
@@ -385,6 +386,7 @@ void UpdateGame(R3Scene *scene)
 
   // Gameover when only one player remaining
   gameover = (living == 0);
+  if (gameover) { SwitchMenu(MAIN_MENU); }
 
   // Remember previous time
   previous_time = current_time;
