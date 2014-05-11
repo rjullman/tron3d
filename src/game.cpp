@@ -56,6 +56,7 @@ void InitGame() {
    bike.Rotate(M_PI, R3zaxis_line);
 }
 
+
 void InitLevel(int human_players, int ai_players) {
    players.clear();
    for (int i = 0; i < human_players + ai_players; i++) {
@@ -189,6 +190,7 @@ void DrawPlayer(Player *player) {
    glPopMatrix();
 
    glDisable(GL_COLOR_MATERIAL);
+
 }
 
 void DrawTrail(Player *player) {
