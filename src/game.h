@@ -9,8 +9,6 @@
 #include "R3/R3.h"
 #include "R3Scene.h"
 #include "fglut/fglut.h"
-#include "OpenAL/al.h"
-//#include "OpenAL/alut.h"
 
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
@@ -31,7 +29,7 @@ struct Color {
       double R(void);
       double G(void);
       double B(void);
-      
+
    private:
       double r;
       double g;
@@ -50,7 +48,7 @@ inline double Color::B(void) { return b; }
 
 struct Player {
    public:
-      Player(Color color, bool is_ai);
+      Player(Color color, bool is_ai, R3Point position, R3Vector direction);
 
       bool IsAI();
 
@@ -79,6 +77,7 @@ void GameUpdate(void);
 void UpdateCamera(Player *player);
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time);
 
+void Check_Collisions(R3Scene *scene, Player *player);
 bool Collide_Box(R3Scene *scene, R3Node *node, R3Point testpoint);
 bool Collide_Scene(R3Scene *scene, R3Node *node, R3Point testpoint);
 bool Collide_Trails(Player *player, R3Point testpoint);

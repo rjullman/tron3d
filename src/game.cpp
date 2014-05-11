@@ -8,8 +8,8 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 15.0f;
-static const float TURN_SPEED = 3.5f;
+static const float PLAYER_SPEED = 7.0f;
+static const float TURN_SPEED = 2.0f;
 static const float PATH_WIDTH = 0.01f;
 
 static const float TRAIL_DIAMETER = 0.05;
@@ -36,9 +36,9 @@ extern vector<Player> players;
 ////////////////////////////////////////////////////////////
 
 Player::
-Player(Color color, bool is_ai)
-    : position(R3Point(0,0,0.5)),
-      direction(R3Vector(1.0f, 0.0f, 0.0f)),
+Player(Color color, bool is_ai, R3Point position, R3Vector direction)
+    : position(position),
+      direction(direction),
       mesh(NULL),
       color(color),
       dead(false),
@@ -69,7 +69,17 @@ void InitLevel(int human_players, int ai_players) {
    players.clear();
    for (int i = 0; i < human_players + ai_players; i++) {
       bool ai = i >= (human_players);
-      players.push_back(Player(PLAYER_COLORS[i], ai));
+      R3Point startposition(0,0,0.5);
+      R3Vector startdirection(1,0,0);
+
+      if (i == 1) {
+         startposition = R3Point(18,0,0.5);
+         startdirection = R3Vector(-1,0,0);
+      }
+
+
+
+      players.push_back(Player(PLAYER_COLORS[i], ai, startposition, startdirection));
    }
 }
 
@@ -105,10 +115,12 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
 
    // Continue the trail
    player->trail.push_back(player->position);
+}
 
+void Check_Collisions(R3Scene *scene, Player *player) {
    // Test for Collisions
    vector<R3Point> testpoints;
-   testpoints.push_back(player->position + 1.0 * player->direction);
+   testpoints.push_back(player->position + 0.9 * player->direction);
 
    //R3Vector side_direction = R3zaxis_vector;
    //side_direction.Cross(player->direction);

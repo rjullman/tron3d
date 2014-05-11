@@ -12,13 +12,13 @@ CXXFLAGS=-Wall -I. -g -DUSE_JPEG
 #
 UNAME := $(shell uname)
 ifneq (,$(findstring Darwin,$(UNAME)))
-	GLLIBS = -framework GLUT -framework OpenGL -framework OpenAL
+	GLLIBS = -framework GLUT -framework OpenGL
         CXXFLAGS := $(CXXFLAGS) -mmacosx-version-min=10.8
 else
   ifneq (,$(findstring CYGWIN,$(UNAME)))
-	GLLIBS = -lopengl32 -lglu32 -lwinmm -lgdi32 -lopenal32 -lalu32
+	GLLIBS = -lopengl32 -lglu32 -lwinmm -lgdi32
   else
-	GLLIBS = -lGLU -lGL -lX11 -lalut
+	GLLIBS = -lGLU -lGL -lX11
   endif
 endif
 
