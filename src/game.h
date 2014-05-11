@@ -33,6 +33,8 @@ struct Player {
       bool dead;
       bool is_ai;
       int turn;
+
+      vector<R3Point> trail;
 };
 
 inline bool Player::IsAI() { return is_ai; }
@@ -55,8 +57,8 @@ bool Collide_Trails(Player *player, R3Point testpoint);
 bool Collide_Point(R3Point testpoint, R3Point trailpoint);
 
 void DrawPlayer(Player *player);
+void DrawTrail(Player *player);
 
-void ToggleMovePlayer(int player_num, int turn_dir);
 void MovePlayer(int player_num, int turn_dir);
 
 #endif

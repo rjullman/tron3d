@@ -322,8 +322,13 @@ void DrawGame(R3Scene *scene)
       // Draw players
       for (unsigned int i = 0; i < players.size(); i++) {
         DrawPlayer(&players[i]);
+	DrawTrail(&players[i]);
       }
    }
+
+
+  glEnable(GL_COLOR_MATERIAL);
+  glColor3f(1.0f,1.0f,1.0f);
 
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
@@ -341,10 +346,11 @@ void DrawGame(R3Scene *scene)
   renderBitmapString(7,50,0,GLUT_BITMAP_HELVETICA_12,s);
   glPopMatrix();
 
-
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
+
+  glDisable(GL_COLOR_MATERIAL);
 
 }
 
