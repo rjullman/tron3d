@@ -8,8 +8,9 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 15.0f;
-static const float TURN_SPEED = 5.0f;
+static const float PLAYER_SPEED = 4.0f;
+static const float TURN_SPEED = 1.0f;
+static const float PATH_WIDTH = 0.1f;
 
 static const char* BIKE_MESH_LOC = "../bikes/m1483.off";
 R3Mesh bike;
@@ -27,7 +28,7 @@ extern vector<Player> players;
 
 Player::
 Player(bool is_ai)
-    : position(R3Point(0,0,0)),
+    : position(R3Point(0,0,0.5)),
       direction(R3Vector(1.0f, 0.0f, 0.0f)),
       mesh(NULL),
       dead(false),
@@ -85,8 +86,71 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
    // Move the player
    player->position += player->direction * PLAYER_SPEED * delta_time;
 
-   // TODO: Check for collisions
-   // On death set player->dead = true
+   vector<R3Point> testpoints;
+   testpoints.push_back(player->position + 1.5 * player->direction);
+
+   //R3Vector side_direction = R3zaxis_vector;
+   //side_direction.Cross(player->direction);
+   //testpoints.push_back(player->position + 1.5 * player->direction + 0.3 * side_direction);
+   //testpoints.push_back(player->position + 1.5 * player->direction - 0.3 * side_direction);
+
+   // Check for collisions in scene
+   for (unsigned int i = 0; i < testpoints.size(); i++) {
+      if (Collide_Scene(scene, scene->root, testpoints[i]))
+         player->dead = true;
+      else {
+      // Check for collisions with laid paths
+         for (unsigned int j = 0; j < players.size(); j++) {
+            if (Collide_Trails(&players[j], testpoints[i]))
+               player->dead = true;
+         }
+      }
+   }
+}
+
+bool Collide_Box(R3Scene *scene, R3Node *node, R3Point testpoint) {
+   R3Box scene_box = *node->shape->box;
+
+   if (testpoint.X() >= scene_box.XMin()
+          && testpoint.X() <= scene_box.XMax()
+          && testpoint.Y() >= scene_box.YMin()
+          && testpoint.Y() <= scene_box.YMax()
+          && testpoint.Z() >= scene_box.ZMin()
+          && testpoint.Z() <= scene_box.ZMax())
+      return true;
+   else
+      return false;
+}
+
+bool Collide_Scene(R3Scene *scene, R3Node *node, R3Point testpoint) {
+
+   if (node->shape != NULL && node->shape->type == R3_BOX_SHAPE) {
+      if (Collide_Box(scene, node, testpoint))
+         return true;
+   }
+
+   // Check for collision with children nodes
+   for (unsigned int i = 0; i < node->children.size(); i++) {
+      if (Collide_Scene(scene, node->children[i], testpoint))
+         return true;
+   }
+
+   return false;
+}
+
+bool Collide_Trails(Player *player, R3Point testpoint) {
+   /*for (unsigned int i = 0; i < player.trails.size(); i++) {
+      if (Collide_Point(testpoint, player.trails[i]))
+         return true
+   }*/
+   return false;
+}
+
+bool Collide_Point(R3Point testpoint, R3Point trailpoint) {
+   /*if (R3Distance(testpoint, trailpoint) <= PATH_WIDTH)
+      return true;
+   else*/
+      return false;
 }
 
 void DrawPlayer(Player *player) {
@@ -122,3 +186,5 @@ void MovePlayer(int player_num, int turn_dir) {
    if ((unsigned int) player_num >= players.size()) { return; }
    players[player_num].turn = turn_dir;
 }
+
+
