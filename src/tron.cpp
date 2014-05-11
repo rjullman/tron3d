@@ -290,6 +290,39 @@ void DrawMenu()
    }
 }
 
+void DrawGameText() {
+   // Disable lighting
+   GLboolean lighting = glIsEnabled(GL_LIGHTING);
+   glDisable(GL_LIGHTING);
+   
+   // Save matrices
+   glMatrixMode(GL_PROJECTION);
+   glPushMatrix();
+   glLoadIdentity();
+   gluOrtho2D(0, GLUTwindow_width, GLUTwindow_height, 0);
+   glMatrixMode(GL_MODELVIEW);
+
+   // Draw game text
+   glColor3f(1.0f,1.0f,1.0f);
+   char s[50];
+   sprintf(s,"-------  Tron 3D --------");
+   glPushMatrix();
+   glLoadIdentity();
+   renderBitmapString(5,30,0,GLUT_BITMAP_HELVETICA_12,s);
+   glPopMatrix();
+   sprintf(s,"Round Duration: %f", GetTime());
+   renderBitmapString(7,50,0,GLUT_BITMAP_HELVETICA_12,s);
+   glPopMatrix();
+
+   // Restore matrices
+   glMatrixMode(GL_PROJECTION);
+   glPopMatrix();
+   glMatrixMode(GL_MODELVIEW);
+
+   // Restore lighting
+   if (lighting) glEnable(GL_LIGHTING);
+}
+
 void SetupViewport(int player_num, int total_players) {
    switch(total_players) {
       case 1:
@@ -326,32 +359,7 @@ void DrawGame(R3Scene *scene)
       }
    }
 
-
-  glEnable(GL_COLOR_MATERIAL);
-  glColor3f(1.0f,1.0f,1.0f);
-
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  gluOrtho2D(0, GLUTwindow_width, GLUTwindow_height, 0);
-  glMatrixMode(GL_MODELVIEW);
-
-  char s[50];
-  sprintf(s,"-------  Tron 3D --------");
-  glPushMatrix();
-  glLoadIdentity();
-  renderBitmapString(5,30,0,GLUT_BITMAP_HELVETICA_12,s);
-  glPopMatrix();
-  sprintf(s,"Round Duration: %f", GetTime());
-  renderBitmapString(7,50,0,GLUT_BITMAP_HELVETICA_12,s);
-  glPopMatrix();
-
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-
-  glDisable(GL_COLOR_MATERIAL);
-
+   DrawGameText();
 }
 
 void UpdateGame(R3Scene *scene)
