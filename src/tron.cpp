@@ -11,6 +11,9 @@
 #include "R3Scene.h"
 #include "game.h"
 #include "fglut/fglut.h"
+#include <fstream>
+#include <string>
+#include <iostream>
 
 ///////////////////////////////////////////////////////////
 // GLOBAL VARIABLES
@@ -305,6 +308,12 @@ void DrawGameText() {
    gluOrtho2D(0, GLUTwindow_width, GLUTwindow_height, 0);
    glMatrixMode(GL_MODELVIEW);
 
+
+    ifstream scores;
+    scores.open ("scores.txt");
+   std::string high_score;
+   std::getline(scores, high_score);
+
    // Draw game text
    glColor3f(1.0f,1.0f,1.0f);
    char s[50];
@@ -316,6 +325,12 @@ void DrawGameText() {
    sprintf(s,"Round Duration: %f", GetTime() - game_start_time);
    renderBitmapString(7,50,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
+
+  sprintf(s,"High Score: %s", high_score.c_str());
+   renderBitmapString(7,70,0,GLUT_BITMAP_HELVETICA_12,s);
+   glPopMatrix();
+   
+
 
    // Restore matrices
    glMatrixMode(GL_PROJECTION);
@@ -391,6 +406,7 @@ void UpdateGame(R3Scene *scene)
     if (players[i].dead) { continue; }
 
     Check_Collisions(scene, &players[i], delta_time);
+
   }
 
   int living = 0;
@@ -408,6 +424,22 @@ void UpdateGame(R3Scene *scene)
   // Gameover when only one player remaining
   gameover = (living == 0);
   if (gameover) {
+
+      ifstream get_scores;
+      get_scores.open ("scores.txt");
+      std::string high_score;
+      std::getline(get_scores, high_score);
+      double h_s = atof(high_score.c_str());
+
+      double new_score = GetTime() - game_start_time;
+      if (new_score > h_s){
+        std::ofstream scores;
+        scores.open("scores.txt", std::ios::out);
+        // FILE * scores = fopen("scores.txt", "w");
+        // scores, "%f",GetTime() - game_start_time);
+        scores << new_score;
+        scores << "\n";
+      }
      previous_time = 0;
      SwitchMenu(MAIN_MENU);
   }
