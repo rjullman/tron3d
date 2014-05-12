@@ -361,13 +361,6 @@ void DrawGame(R3Scene *scene)
       }
    }
 
-    // Check for any collisions
-    for (unsigned int i = 0; i < players.size(); i++) {
-      if (players[i].dead) { continue; }
-
-      Check_Collisions(scene, &players[i]);
-    }
-
    // Return to full screen viewport
    glViewport(0, 0, GLUTwindow_width, GLUTwindow_height);
 
@@ -392,6 +385,13 @@ void UpdateGame(R3Scene *scene)
 
   // time passed since starting
   double delta_time = current_time - previous_time;
+
+  // Check for any collisions
+  for (unsigned int i = 0; i < players.size(); i++) {
+    if (players[i].dead) { continue; }
+
+    Check_Collisions(scene, &players[i], delta_time);
+  }
 
   int living = 0;
   for (unsigned int i = 0; i < players.size(); i++) {
