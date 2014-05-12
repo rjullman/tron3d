@@ -59,7 +59,7 @@ Player(Color color, bool is_ai, R3Point position, R3Vector direction)
 void InitGame() {
    // Load bike mesh
    irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
-   //engine->play2D("ridindirty.mp3", true);
+   engine->play2D("ridindirty.mp3", true);
    bike.Read(BIKE_MESH_LOC);
    bike.Translate(-0.19,0,0);
    bike.Rotate(-M_PI/2, R3yaxis_line);
@@ -292,12 +292,41 @@ void DrawTrail(Player *player) {
    gluQuadricNormals(glu_sphere, (GLenum) GLU_SMOOTH);
    gluQuadricDrawStyle(glu_sphere, (GLenum) GLU_FILL);
 
+   // R3Vector normal = player->direction;
+   // R3Point pos = player->position - 4 * player->direction;
+
+   vector<R3Point> player_positions;
+   vector<R3Vector> player_directions;
+   for (int j = 0; j < players.size(); j++){
+      player_positions.push_back(players[j].position - 4* players[j].direction);
+      player_directions.push_back(players[j].direction);
+
+   }
+   int count_test = 0;
    for (unsigned int i = 1; i < player->trail.size(); i++) {
       // Make cylinder between p1 and p2
       // See: http://www.thjsmith.com/40/cylinder-between-two-points-opengl-c
       R3Point p1 = player->trail[i-1];
       R3Point p2 = player->trail[i];
 
+      int count = 0;
+
+      for (int j = 0; j < players.size(); j++){
+         R3Point pos = player_positions[j];
+         R3Vector normal = player_directions[j];
+
+         R3Vector v = p1 - pos;
+         R3Vector u = p2 - pos;
+
+         if(v.Dot(normal) <= 0 && u.Dot(normal) <= 0){
+            count ++;
+         }
+
+      }
+
+
+
+      if (count != players.size()){
       // Compute direction and angle of rotation from standard
       R3Vector p = (p2 - p1);
       R3Vector t = R3Vector(R3zaxis_vector);
@@ -309,8 +338,11 @@ void DrawTrail(Player *player) {
       glTranslated(p1.X(),p1.Y(),p1.Z());
       glRotated(angle,t.X(),t.Y(),t.Z());
       gluCylinder(glu_sphere, TRAIL_DIAMETER, TRAIL_DIAMETER, p.Length(), 32, 32);
+      count_test ++;
       glPopMatrix();
+      }
    }
+   printf("%d\n", count_test);
 }
 
 void MovePlayer(int player_num, int turn_dir) {
