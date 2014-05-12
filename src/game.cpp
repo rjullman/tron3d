@@ -59,12 +59,12 @@ Player(Color color, bool is_ai, R3Point position, R3Vector direction)
 void InitGame() {
    // Load bike mesh
    irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
-   engine->play2D("ridindirty.mp3", true);
-   bike.Read(BIKE_MESH_LOC);
+   //engine->play2D("ridindirty.mp3", true);
+   /*bike.Read(BIKE_MESH_LOC);
    bike.Translate(-0.19,0,0);
    bike.Rotate(-M_PI/2, R3yaxis_line);
    bike.Rotate(M_PI/2, R3xaxis_line);
-   bike.Rotate(M_PI, R3zaxis_line);
+   bike.Rotate(M_PI, R3zaxis_line);*/
 }
 
 
@@ -123,7 +123,7 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
 void Check_Collisions(R3Scene *scene, Player *player) {
    // Test for Collisions
    vector<R3Point> testpoints;
-   testpoints.push_back(player->position + 0.9 * player->direction);
+   testpoints.push_back(player->position + 0.2 * player->direction);
 
    //R3Vector side_direction = R3zaxis_vector;
    //side_direction.Cross(player->direction);
@@ -176,22 +176,25 @@ bool Collide_Scene(R3Scene *scene, R3Node *node, R3Point testpoint) {
 
 bool Collide_Trails(Player *player, R3Point testpoint) {
    for (unsigned int i = 1; i < player->trail.size(); i++) {
-      if (Collide_Point(testpoint, player->trail[i-1], player->trail[i]))
+      if (Collide_Point(testpoint, player->trail[i-1], player->trail[i], player->direction))
          return true;
    }
    return false;
 }
 
-bool Collide_Point(R3Point testpoint, R3Point trailpoint1, R3Point trailpoint2) {
+bool Collide_Point(R3Point testpoint, R3Point trailpoint1, R3Point trailpoint2, R3Vector direction) {
    R3Vector to = trailpoint2 - trailpoint1;
    R3Vector d = testpoint - trailpoint1;
 
    R3Vector normal = R3zaxis_vector;
    normal.Cross(to);
 
+   if (d.Dot(normal) > 0)
+      normal = -normal;
+
    float distance = (d).Dot(normal);
 
-   R3Point p = testpoint - normal * distance;
+   R3Point p = testpoint + direction * distance;
 
    if (distance <= PATH_WIDTH && R3Distance(p, trailpoint1) <= R3Distance(trailpoint1, trailpoint2))
       return true;
@@ -213,7 +216,8 @@ void DrawPlayer(Player *player) {
    glPushMatrix();
    glTranslatef(player->position.X(), player->position.Y(), 0.0f);
    glRotatef(angle, 0.0f, 0.0f, 1.0f);
-   player->mesh->Draw();
+   glutSolidCube(0.5f);
+   //player->mesh->Draw();
    glPopMatrix();
 
    glDisable(GL_COLOR_MATERIAL);
