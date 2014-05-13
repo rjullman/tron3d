@@ -37,9 +37,10 @@ extern vector<Player> players;
 ////////////////////////////////////////////////////////////
 
 Player::
-Player(Color color, bool is_ai, R3Point position, R3Vector direction)
+Player(Color color, bool is_ai, R3Point position, R3Vector direction, int perspective)
     : position(position),
       direction(direction),
+      perspective(perspective),
       mesh(NULL),
       color(color),
       dead(false),
@@ -59,7 +60,7 @@ Player(Color color, bool is_ai, R3Point position, R3Vector direction)
 void InitGame() {
    // Load bike mesh
    irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
-   engine->play2D("ridindirty.mp3", true);
+   //engine->play2D("ridindirty.mp3", true);
    bike.Read(BIKE_MESH_LOC);
    bike.Translate(-0.19,0,0);
    bike.Rotate(-M_PI/2, R3yaxis_line);
@@ -80,26 +81,40 @@ void InitLevel(int human_players, int ai_players) {
          startdirection = R3Vector(-1,0,0);
       }
 
-      players.push_back(Player(PLAYER_COLORS[i], ai, startposition, startdirection));
+      players.push_back(Player(PLAYER_COLORS[i], ai, startposition, startdirection, OVER_THE_SHOULDER));
    }
 }
 
-void UpdateCamera(Player *player) {
+void UpdateCamera(Player *player, int camera_perspective) {
    // Set projection transformation
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
    gluPerspective(360.0/M_PI*0.25, (GLdouble) 1, 0.01, 10000);
 
    // Set the camera direction
-   R3Point eye = player->position - 4 * player->direction;
+   if (camera_perspective == OVER_THE_SHOULDER) {
+   R3Point eye = player->position - 5 * player->direction;
    float x = eye.X();
    float y = eye.Y();
    float dx = player->direction.X();
    float dy = player->direction.Y();
 
-   gluLookAt(	x, y, 1.0f,
-              x+dx, y+dy,  1.0f,
+   gluLookAt(	x, y, 1.4f,
+              x+dx, y+dy,  1.4f,
               0.0f, 0.0f,  1.0f);
+   }
+   else if (camera_perspective == FIRST_PERSON) {
+      R3Point eye = player->position + 1 * player->direction;
+      float x = eye.X();
+      float y = eye.Y();
+      float dx = player->direction.X();
+      float dy = player->direction.Y();
+
+      gluLookAt(  x, y, 0.5f,
+              x+dx, y+dy,  0.5f,
+              0.0f, 0.0f,  1.0f);
+   }
+
 }
 
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {

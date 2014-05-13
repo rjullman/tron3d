@@ -329,7 +329,7 @@ void DrawGameText() {
   sprintf(s,"High Score: %s", high_score.c_str());
    renderBitmapString(7,70,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
-   
+
 
 
    // Restore matrices
@@ -363,7 +363,8 @@ void DrawGame(R3Scene *scene)
       SetupViewport(viewports_drawn++, num_humans);
 
       // Update player point of view
-      UpdateCamera(&players[i]);
+
+      UpdateCamera(&players[i], players[i].perspective);
 
       // Draw scene surfaces
       glEnable(GL_LIGHTING);

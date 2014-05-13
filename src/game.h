@@ -23,6 +23,11 @@ enum {
    TURNING_RIGHT = -1
 };
 
+enum {
+   OVER_THE_SHOULDER = 0,
+   FIRST_PERSON = 1
+};
+
 struct Color {
    public:
       Color(double R, double G, double B);
@@ -48,12 +53,13 @@ inline double Color::B(void) { return b; }
 
 struct Player {
    public:
-      Player(Color color, bool is_ai, R3Point position, R3Vector direction);
+      Player(Color color, bool is_ai, R3Point position, R3Vector direction, int perspective);
 
       bool IsAI();
 
       R3Point position;
       R3Vector direction;
+      int perspective;
       R3Mesh *mesh;
       Color color;
       bool dead;
@@ -74,7 +80,7 @@ void InitGame();
 void InitLevel(int human_players, int ai_players);
 
 void GameUpdate(void);
-void UpdateCamera(Player *player);
+void UpdateCamera(Player *player, int camera_perspective);
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time);
 
 void Check_Collisions(R3Scene *scene, Player *player, double delta_time);
