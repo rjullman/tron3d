@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////
 
 #include "game.h"
-// #include "irrKlang/include/irrKlang.h"
+ #include "irrKlang/include/irrKlang.h"
 
 ////////////////////////////////////////////////////////////
 // GLOBAL CONSTANTS
@@ -30,6 +30,7 @@ R3Mesh bike;
 ////////////////////////////////////////////////////////////
 
 extern vector<Player> players;
+irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
 
 
 ////////////////////////////////////////////////////////////
@@ -59,8 +60,7 @@ Player(Color color, bool is_ai, R3Point position, R3Vector direction, int view)
 
 void InitGame() {
    // Load Sound
-   // irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
-   // engine->play2D("ridindirty.mp3", true);
+   engine->play2D("ridindirty.mp3", true);
 
    // Load bike mesh
    bike.Read(BIKE_MESH_LOC);
@@ -83,7 +83,7 @@ void InitLevel(int human_players, int ai_players) {
          startdirection = R3Vector(-1,0,0);
       }
 
-      players.push_back(Player(PLAYER_COLORS[i], ai, startposition, startdirection, FIRST_PERSON));
+      players.push_back(Player(PLAYER_COLORS[i], ai, startposition, startdirection, OVER_THE_SHOULDER));
    }
 }
 
@@ -142,12 +142,14 @@ void Check_Collisions(R3Scene *scene, Player *player, double delta_time) {
    // Check for collisions in scene
    if (Collide_Scene(scene, scene->root, testpoint)) {
       player->dead = true;
+      engine->play2D("crash.wav");
    }
    else {
       // Check for collisions with laid paths
       for (unsigned int j = 0; j < players.size(); j++) {
          if (Collide_Trails(&players[j], testpoint, nextpoint)) {
             player->dead = true;
+            engine->play2D("crash.wav");
          }
       }
    }
