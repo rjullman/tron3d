@@ -588,55 +588,38 @@ void UpdateGame(R3Scene *scene)
 ////////////////////////////////////////////////////////////
 
 
-// load a 256x256 RGB .RAW file as a texture
-GLuint LoadTextureRaw( const char * filename, int wrap )
+// load texture from bitmap
+GLuint LoadTextureBmp( const char * filename, int repeat )
 {
     GLuint texture;
     int width, height;
     char * data;
     FILE * file;
-
-    // open texture data
     file = fopen( filename, "rb" );
     if ( file == NULL ) return 0;
 
-    // allocate buffer
+    // size of grid bitmap
     width = 420;
     height = 420;
     data = (char*)malloc( width * height * 3 );
+    fread(data, width * height * 3, 1, file);
+    fclose(file);
 
-    // read texture data
-    fread( data, width * height * 3, 1, file );
-    fclose( file );
-
-    // allocate a texture name
     glGenTextures( 1, &texture );
-
-    // select our current texture
     glBindTexture( GL_TEXTURE_2D, texture );
-
-    // select modulate to mix texture with color for shading
     glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-
-    // when texture area is small, bilinear filter the closest mipmap
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                      GL_LINEAR_MIPMAP_NEAREST );
-    // when texture area is large, bilinear filter the first mipmap
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-    // if wrap is true, the texture wraps over at the edges (repeat)
-    //       ... false, the texture ends at the edges (clamp)
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-                     wrap ? GL_REPEAT : GL_CLAMP );
+                     repeat ? GL_REPEAT : GL_CLAMP );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-                     wrap ? GL_REPEAT : GL_CLAMP );
-
-    // build our texture mipmaps
+                     repeat ? GL_REPEAT : GL_CLAMP );
     gluBuild2DMipmaps( GL_TEXTURE_2D, 3, width, height,
                        GL_RGB, GL_UNSIGNED_BYTE, data );
 
-    // free buffer
-    free( data );
+    free(data);
 
     return texture;
 }
@@ -1264,7 +1247,7 @@ void GLUTInit(int *argc, char **argv)
    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 
    // Initialize game
-   texture = LoadTextureRaw("../textures/grid.bmp", 1);
+   texture = LoadTextureBmp("../textures/grid.bmp", 1);
    InitGame();
 }
 
