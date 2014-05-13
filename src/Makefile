@@ -12,6 +12,7 @@ CXXFLAGS=-Wall -I. -g -DUSE_JPEG
 
 
 # SELECT APPROPRIATE IRRKLANG LIBRARIES FOR DIFFERENT PLATFORMS
+IRRLIB = irrKlang/libirrklang.dylib
 
 #ifeq ($(OS),Windows_NT)                                                  
 #    IRRLIB =
