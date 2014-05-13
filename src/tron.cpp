@@ -1048,6 +1048,8 @@ void OptionsMenuToggle(int action) {
       case PLAYER_2_RIGHT_SELECTED:
 	 break;
    }
+   ChangeVolume(music);
+   ChangeFX(sound_fx);
 }
 
 // Handles all option toggling

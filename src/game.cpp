@@ -62,8 +62,10 @@ extern int GLUTwindow_height;
 extern int GLUTwindow_width;
 static double level_size;
 
-// MUSIC: irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
+irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
+irrklang::ISound* background = engine->play2D("TronLegacyTheme.mp3", true, false, true);
 
+irrklang::ISoundSource* fx = engine->addSoundSourceFromFile("crash.wav"); 
 ////////////////////////////////////////////////////////////
 // PLAYER IMPLEMENTATION
 ////////////////////////////////////////////////////////////
@@ -91,11 +93,21 @@ Player(Color color, bool is_ai, R3Point position, R3Vector direction, int view)
 ////////////////////////////////////////////////////////////
 // GAME IMPLEMENTATION
 ////////////////////////////////////////////////////////////
+void ChangeVolume(int music){
+   if(background){
+      double new_vol = (float)music;
+      background->setVolume(new_vol/4);
+   }
+}
 
+void ChangeFX(int new_fx){
+   if(fx){
+      double new_vol = (float)new_fx;
+      fx->setDefaultVolume(new_vol/4);
+   }
+}
 void InitGame() {
    // Load Sound
-   // MUSIC: engine->play2D("ridindirty.mp3", true);
-
    // Load bike mesh
    bike.Read(BIKE_MESH_LOC);
    bike.Translate(-0.19,0,0);
@@ -109,7 +121,6 @@ void InitLevel(int human_players, int ai_players,
 	       int view, double size, vector<R3Point> init_positions,
           vector<R3Vector> init_directions) {
    level_size = size;
-
    players.clear();
    for (int i = 0; i < human_players + ai_players; i++) {
       bool ai = i >= (human_players);
@@ -256,7 +267,7 @@ bool Check_Collisions(R3Scene *scene, Player *player, double delta_time, int for
    if (Collide_Scene(scene, scene->root, testpoint)) {
       if (for_decisions == NORMAL) {
          player->dead = true;
-         //MUSIC: engine->play2D("crash.wav");
+         engine->play2D(fx);
       }
       return true;
    }
@@ -269,7 +280,7 @@ bool Check_Collisions(R3Scene *scene, Player *player, double delta_time, int for
          if (Collide_Trails(&players[j], testpoint, nextpoint)) {
             if (for_decisions == NORMAL) {
                player->dead = true;
-               // MUSIC: engine->play2D("crash.wav");
+               engine->play2D(fx);
             }
             return true;
          }

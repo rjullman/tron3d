@@ -88,7 +88,8 @@ inline bool Player::IsAI() { return is_ai; }
 ////////////////////////////////////////////////////////////
 // API API
 ////////////////////////////////////////////////////////////
-
+void ChangeVolume(int MAX_VOL);
+void ChangeFX(int new_fx);
 void InitGame();
 void InitLevel(int human_players, int ai_players,
                int view, double size, vector<R3Point> init_positions, vector<R3Vector> init_directions);
