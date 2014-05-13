@@ -104,7 +104,7 @@ We believe that we have implemented the following features:
 </TBODY>
 </TABLE>
 
-Comments
+We setup cameras for each each player (above is split screen play).
 
 <hr><br>
 
@@ -121,7 +121,7 @@ Used the OpenGL library to deal with lighting and smooth shading of our objects 
 <!------------------------------------------------------------------------>
 
 
-Control your own bike using the arrow keys/'awd'. Also an interactive menuw with game options.
+Control your own bike using the arrow keys/'awd'. Also an interactive menu with game options.
 <hr><br>
 
 <!------------------------------------------------------------------------>
@@ -205,7 +205,8 @@ high scores. Also, a 'boost meter' that shows amount of fuel available for jump.
 <!------------------------------------------------------------------------>
 
 
-Only print the objects in the scene that are inside the view frustum of the camera.
+Only draws the objects in the scene that are inside the view frustum of the camera.
+This optimization along with level of detail control greatly increased the framerate.
 <HR><BR>
 
 <!------------------------------------------------------------------------>
@@ -213,7 +214,9 @@ Only print the objects in the scene that are inside the view frustum of the came
 <!------------------------------------------------------------------------>
 
 
-Comments.
+The bikes lay pipes behind them that add to the scene complexity.
+The detail of these pipes is decreased as the player is further away from them.
+This optimization along with view frustum culling greatly improved framerate.
 <HR><BR>
 
 <!------------------------------------------------------------------------>
@@ -237,10 +240,6 @@ with special cases like parallel lines.
 Comments.
 <HR><BR>
 
-
-
-
-<!------------------------------------------------------------------------>
 
 </BODY>
 </HTML>
