@@ -149,8 +149,13 @@ void UpdateCamera(Player *player, int camera_perspective) {
            0.0f, 0.0f,  1.0f);
    }
    else if (camera_perspective == FIRST_PERSON) {
-      gluLookAt(  x, y, 0.5f,
-           x+dx, y+dy,  0.5f,
+      double height;
+      if (player->jumping && !player->dead)
+         height = BIKE_HEIGHT;
+      else
+         height = BIKE_HEIGHT/2.0;
+      gluLookAt(  x, y, height,
+           x+dx, y+dy,  height,
            0.0f, 0.0f,  1.0f);
    }
 }
@@ -158,13 +163,13 @@ void UpdateCamera(Player *player, int camera_perspective) {
 
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
    if (player->is_ai) {
-      if (Check_Collisions(scene, player, delta_time, CHECK_FRONT, 100)) {
-         if (Check_Collisions(scene, player, delta_time, CHECK_LEFT, 50) && !(Check_Collisions(scene, player, delta_time, CHECK_RIGHT, 50))) {
+      if (Check_Collisions(scene, player, delta_time, CHECK_FRONT)) {
+         if (Check_Collisions(scene, player, delta_time, CHECK_LEFT) && !(Check_Collisions(scene, player, delta_time, CHECK_RIGHT))) {
             player->direction.Rotate(R3zaxis_vector,
                 1 * AI_TURN_SPEED);
             player->position += player->direction * PLAYER_SPEED * delta_time;
          }
-         else if (!(Check_Collisions(scene, player, delta_time, CHECK_LEFT, 50)) && (Check_Collisions(scene, player, delta_time, CHECK_RIGHT, 50))) {
+         else if (!(Check_Collisions(scene, player, delta_time, CHECK_LEFT)) && (Check_Collisions(scene, player, delta_time, CHECK_RIGHT))) {
             player->direction.Rotate(R3zaxis_vector,
                 -1 * AI_TURN_SPEED);
             player->position += player->direction * PLAYER_SPEED * delta_time;
@@ -221,7 +226,7 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
    player->trail.push_back(player->position);
 }
 
-bool Check_Collisions(R3Scene *scene, Player *player, double delta_time, int for_decisions, int precision) {
+bool Check_Collisions(R3Scene *scene, Player *player, double delta_time, int for_decisions) {
    R3Point nextpoint(0,0,0.5);
 
    // Test for Collisions
@@ -235,12 +240,12 @@ bool Check_Collisions(R3Scene *scene, Player *player, double delta_time, int for
    else if (for_decisions == CHECK_LEFT) {
       R3Vector side = R3zaxis_vector;
       side.Cross(player->direction);
-      nextpoint = player->position + delta_time * PLAYER_SPEED * side * precision;
+      nextpoint = player->position + delta_time * PLAYER_SPEED * side * 10;
    }
    else if (for_decisions == CHECK_RIGHT) {
       R3Vector side = R3zaxis_vector;
       side.Cross(player->direction);
-      nextpoint = player->position - delta_time * PLAYER_SPEED * side * precision;
+      nextpoint = player->position - delta_time * PLAYER_SPEED * side * 10;
    }
 
    // Check for collisions in scene
@@ -327,16 +332,29 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
    double z2 = (p3 + (p4-p3)/2).Z();
 
    double d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
+   // parallel //
    if (d == 0) {
-      R3Vector dir = p2 - p1;
-      float t2 = 1.f;
-      float t3 = abs((p3 - p1).Dot(dir) / dir.Dot(dir));
-      float t4 = abs((p4 - p1).Dot(dir) / dir.Dot(dir));
+      float numea = (x4-x3)*(y1-y3) - (y4-y3)*(x1-x3);
+      float numeb = (x2-x1)*(y1-y3) - (y2-y1)*(x1-x3);
+      // collinear //
+      if (numea == 0.0 && numeb == 0.0) {
+         R3Vector dir = p2 - p1;
+         float t2 = 1.f;
+         float t3 = abs((p3 - p1).Dot(dir) / dir.Dot(dir));
+         float t4 = abs((p4 - p1).Dot(dir) / dir.Dot(dir));
 
-      if (t3 <= t2 || t4 <= t2)
-         return abs(z1 - z2) < BIKE_HEIGHT/4;
-      else
+         // overlap //
+         if (t3 <= t2 || t4 <= t2) {
+            printf("%f t3\n", t3);
+            printf("%f t4\n", t4);
+            return abs(z1 - z2) < BIKE_HEIGHT/4;
+         }
+         else
+            return false;
+      }
+      else {
          return false;
+      }
    }
 
    double xi = ((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d;

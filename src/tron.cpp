@@ -255,6 +255,42 @@ void DrawMenuText(const char *text, bool select, double px, double py) {
       if (lighting) glEnable(GL_LIGHTING);
 }
 
+void DrawGameoverText(const char *text, double px, double py) {
+   // Disable lighting
+   GLboolean lighting = glIsEnabled(GL_LIGHTING);
+   glDisable(GL_LIGHTING);
+
+   // Save matrices and setup projection
+   glMatrixMode(GL_PROJECTION);
+   glPushMatrix();
+   glLoadIdentity();
+   gluOrtho2D(0.0, GLUTwindow_width, 0.0, GLUTwindow_height);
+   glMatrixMode(GL_MODELVIEW);
+   glPushMatrix();
+   glLoadIdentity();
+   glRasterPos2i(px, py);
+
+   // Font choice
+   void * font = GLUT_BITMAP_TIMES_ROMAN_24;
+
+      // Display characters
+      glColor3d(1.0, 1.0, 1.0);
+      while (*text) {
+   glutBitmapCharacter(font, *text);
+   text++;
+      }
+
+      // Restore matrices
+      glMatrixMode(GL_MODELVIEW);
+      glPopMatrix();
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glFlush();
+
+      // Restore lighting
+      if (lighting) glEnable(GL_LIGHTING);
+}
+
 void DrawMenuHelper(const char* text[], int items) {
    // Keep menu item within bounds
    if (menu_option < 0) { menu_option = 0; }
@@ -475,7 +511,7 @@ void UpdateGame(R3Scene *scene)
   for (unsigned int i = 0; i < players.size(); i++) {
     if (players[i].dead) { continue; }
 
-    Check_Collisions(scene, &players[i], delta_time, NORMAL, 1);
+    Check_Collisions(scene, &players[i], delta_time, NORMAL);
   }
 
   int living = 0;
@@ -503,6 +539,30 @@ void UpdateGame(R3Scene *scene)
         scores << new_score;
         scores << "\n";
      }
+
+     int MAX_LINE_LEN = 50;
+     char text[] = "GAMOVER";
+     DrawGameoverText(text, 20, 20);
+
+     /*for (unsigned int i = 0; i < players.size(); i++) {
+        if (!players[i].is_ai) {
+          print("Player " + i + ":  ")
+        }
+        else {
+          print("Computer   : ")
+        }
+        if (!players[i].dead) {
+          print("WINS!")
+        }
+        else {
+          print("LOSES")
+        }
+      }*/
+
+        //wait
+
+
+
 
      // Reset to the main menu
      previous_time = 0;
