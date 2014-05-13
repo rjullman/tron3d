@@ -1284,6 +1284,9 @@ ReadScene(const char *filename)
       return 0;
     }
 
+    init_directions.clear();
+    init_positions.clear();
+
     char cmd[128];
     vector<R3Particle *> particles_for_springs;
     while (fscanf(fp, "%s", cmd) == 1) {
