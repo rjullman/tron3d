@@ -77,6 +77,7 @@ struct Player {
       int turn;
       bool jumping;
       double fuel_time;
+      bool win;
 
       vector<R3Point> trail;
 };

@@ -80,6 +80,7 @@ Player(Color color, bool is_ai, R3Point position, R3Vector direction, int view)
       turn(NOT_TURNING),
       jumping(false),
       fuel_time(FULL_FUEL),
+      win(false),
       trail(vector<R3Point>())
 {
    // Currently no bike mesh options
@@ -343,12 +344,9 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
          float t3 = abs((p3 - p1).Dot(dir) / dir.Dot(dir));
          float t4 = abs((p4 - p1).Dot(dir) / dir.Dot(dir));
 
-         // overlap //
-         if (t3 <= t2 || t4 <= t2) {
-            printf("%f t3\n", t3);
-            printf("%f t4\n", t4);
+         // overlap
+         if (t3 <= t2 || t4 <= t2)
             return abs(z1 - z2) < BIKE_HEIGHT/4;
-         }
          else
             return false;
       }
@@ -438,6 +436,9 @@ void DrawFuel(Player *player) {
 }
 
 void DrawTrail(Player *player, Player *perspective, double xfov) {
+   glEnable(GL_COLOR_MATERIAL);
+   glColor3d(player->color.R(), player->color.G(), player->color.B());
+
    static GLUquadricObj *glu_sphere = gluNewQuadric();
    gluQuadricTexture(glu_sphere, GL_TRUE);
    gluQuadricNormals(glu_sphere, (GLenum) GLU_SMOOTH);
@@ -477,7 +478,6 @@ void DrawTrail(Player *player, Player *perspective, double xfov) {
       	 detail = MAX(detail, MIN_PIPE_DETAIL);
 
       	 // Draw cylinder
-
       	 glPushMatrix();
       	 glTranslated(p1.X(),p1.Y(),p1.Z());
       	 glRotated(angle,t.X(),t.Y(),t.Z());
@@ -487,6 +487,7 @@ void DrawTrail(Player *player, Player *perspective, double xfov) {
       }
    }
 
+   glDisable(GL_COLOR_MATERIAL);
 }
 
 void MovePlayer(int player_num, int move) {

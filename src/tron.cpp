@@ -37,7 +37,7 @@ GLuint texture;
 
 // Menu variables
 
-enum { MAIN_MENU, OPTIONS_MENU };
+enum { MAIN_MENU, OPTIONS_MENU, IN_GAME };
 enum { MENU_ENTER, MENU_LEFT, MENU_RIGHT };
 int menu = MAIN_MENU;
 int menu_option = 0;
@@ -102,9 +102,10 @@ static int quit = 0;
 // GLUT variables
 
 static int GLUTwindow = 0;
-int GLUTwindow_height = 512;
-int GLUTwindow_width = 512;
+int GLUTwindow_height = 1024;
+int GLUTwindow_width = 1024;
 
+static double previous_time = 0;
 
 
 // GLUT command list
@@ -206,14 +207,14 @@ void SwitchMenu(int new_menu);
 ////////////////////////////////////////////////////////////
 
 bool Playing() {
-   return !gameover;
+   return !gameover || menu == IN_GAME;
 }
 
 ////////////////////////////////////////////////////////////
 // GAME DRAWING
 ////////////////////////////////////////////////////////////
 
-void DrawMenuText(const char *text, bool select, double px, double py) {
+void DrawMenuText(const char *text, bool select, bool options, double px, double py) {
    // Disable lighting
    GLboolean lighting = glIsEnabled(GL_LIGHTING);
    glDisable(GL_LIGHTING);
@@ -231,64 +232,31 @@ void DrawMenuText(const char *text, bool select, double px, double py) {
    // Font choice
    void * font = GLUT_BITMAP_TIMES_ROMAN_24;
 
-   // Indicate selecteted char via '*'
-   if (select) { glutBitmapCharacter(font, '*'); }
-   int num_spaces = select ? 2 : 4;
-   for (int i = 0; i < num_spaces; i++)
-      glutBitmapCharacter(font, ' ');
+   if (options) {
+      // Indicate selecteted char via '*'
+      if (select) { glutBitmapCharacter(font, '*'); }
+      int num_spaces = select ? 2 : 4;
+      for (int i = 0; i < num_spaces; i++)
+	 glutBitmapCharacter(font, ' ');
+   }
 
-      // Display characters
-      glColor3d(1.0, 1.0, 1.0);
-      while (*text) {
-	 glutBitmapCharacter(font, *text);
-	 text++;
-      }
-
-      // Restore matrices
-      glMatrixMode(GL_MODELVIEW);
-      glPopMatrix();
-      glMatrixMode(GL_PROJECTION);
-      glPopMatrix();
-      glFlush();
-
-      // Restore lighting
-      if (lighting) glEnable(GL_LIGHTING);
-}
-
-void DrawGameoverText(const char *text, double px, double py) {
-   // Disable lighting
-   GLboolean lighting = glIsEnabled(GL_LIGHTING);
+   // Display characters
    glDisable(GL_LIGHTING);
+   glColor3d(1.0, 1.0, 1.0);
+   while (*text) {
+      glutBitmapCharacter(font, *text);
+      text++;
+   }
 
-   // Save matrices and setup projection
-   glMatrixMode(GL_PROJECTION);
-   glPushMatrix();
-   glLoadIdentity();
-   gluOrtho2D(0.0, GLUTwindow_width, 0.0, GLUTwindow_height);
+   // Restore matrices
    glMatrixMode(GL_MODELVIEW);
-   glPushMatrix();
-   glLoadIdentity();
-   glRasterPos2i(px, py);
+   glPopMatrix();
+   glMatrixMode(GL_PROJECTION);
+   glPopMatrix();
+   glFlush();
 
-   // Font choice
-   void * font = GLUT_BITMAP_TIMES_ROMAN_24;
-
-      // Display characters
-      glColor3d(1.0, 1.0, 1.0);
-      while (*text) {
-   glutBitmapCharacter(font, *text);
-   text++;
-      }
-
-      // Restore matrices
-      glMatrixMode(GL_MODELVIEW);
-      glPopMatrix();
-      glMatrixMode(GL_PROJECTION);
-      glPopMatrix();
-      glFlush();
-
-      // Restore lighting
-      if (lighting) glEnable(GL_LIGHTING);
+   // Restore lighting
+   if (lighting) glEnable(GL_LIGHTING);
 }
 
 void DrawMenuHelper(const char* text[], int items) {
@@ -299,6 +267,7 @@ void DrawMenuHelper(const char* text[], int items) {
       bool selected = (menu_option % items) == i;
       DrawMenuText(text[i],
 		   selected,
+		   true,
 		   GLUTwindow_width/2 * 0.55,
 		   GLUTwindow_height/2 - (i-items/2) * 40);
    }
@@ -378,9 +347,11 @@ void DrawGameText() {
    gluOrtho2D(0, GLUTwindow_width, GLUTwindow_height, 0);
    glMatrixMode(GL_MODELVIEW);
 
+   static double last_time = 0;
+   if (!gameover) { last_time = GetTime(); }
 
-    ifstream scores;
-    scores.open ("scores.txt");
+   ifstream scores;
+   scores.open ("scores.txt");
    std::string high_score;
    std::getline(scores, high_score);
 
@@ -392,15 +363,13 @@ void DrawGameText() {
    glLoadIdentity();
    renderBitmapString(310,30,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
-   sprintf(s,"Round Duration: %f", GetTime() - game_start_time);
+   sprintf(s,"Round Duration: %f", last_time - game_start_time);
    renderBitmapString(310,50,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
 
-  sprintf(s,"High Score: %s", high_score.c_str());
+   sprintf(s,"High Score: %s", high_score.c_str());
    renderBitmapString(310,70,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
-
-
 
    // Restore matrices
    glMatrixMode(GL_PROJECTION);
@@ -423,6 +392,18 @@ void SetupViewport(int player_num, int total_players) {
    }
 }
 
+void DrawEndGameText(Player *player) {
+   if (player->win) {
+      DrawMenuText("YOU WIN!", false, false, GLUTwindow_width/2 - 75, GLUTwindow_width/2);
+   } else if (player->dead) {
+      DrawMenuText("YOU LOSE!", false, false, GLUTwindow_width/2 - 75, GLUTwindow_width/2);
+   }
+
+   if (gameover) {
+      DrawMenuText("(press enter)", false, false, GLUTwindow_width/2 - 75, GLUTwindow_width/2 - 40);
+   }
+}
+
 void DrawGame(R3Scene *scene)
 {
    int viewports_drawn = 0;
@@ -433,7 +414,6 @@ void DrawGame(R3Scene *scene)
       SetupViewport(viewports_drawn++, num_humans);
 
       // Update player point of view
-
       UpdateCamera(&players[i], players[i].view);
 
       // Draw scene surfaces
@@ -442,39 +422,36 @@ void DrawGame(R3Scene *scene)
 
       // Draw players
       for (unsigned int j = 0; j < players.size(); j++) {
-	 DrawPlayer(&players[j]);
+	 if (!players[j].dead) { DrawPlayer(&players[j]); }
 	 DrawTrail(&players[j], &players[i], camera.xfov);
       }
 
       DrawFuel(&players[i]);
+      DrawEndGameText(&players[i]);
     }
 
+   glViewport(0, GLUTwindow_height- 128, 128, 128);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluPerspective(360.0/M_PI*0.25, (GLdouble) 1, 0.01, 10000);
+   gluLookAt(  0, 0, 40,
+	       0, 0,  0.0f,
+	       1.0f, 0.0f,  0.0f);
+   // Draw scene surfaces
 
+   glClearDepth(1);
+   glEnable(GL_DEPTH_TEST);
+   GLfloat AmbientLight[] = {1.0, 1.0, 1.0};
+   glLightfv (GL_LIGHT0, GL_AMBIENT, AmbientLight);
+   // Draw players
+   for (unsigned int i = 0; i < players.size(); i++) {
+      for (unsigned int j = 0; j < players.size(); j++) {
+	 DrawPlayer(&players[j]);
+	 DrawTrail(&players[j], &players[i], camera.xfov);
+      }
+   }
 
-  glViewport(0, GLUTwindow_height- 128, 128, 128);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(360.0/M_PI*0.25, (GLdouble) 1, 0.01, 10000);
-  gluLookAt(  0, 0, 40,
-           0, 0,  0.0f,
-           1.0f, 0.0f,  0.0f);
-  // Draw scene surfaces
-  //glEnable(GL_LIGHTING);
-  //DrawScene(scene);
-
-  glClearDepth(1);
-  glEnable(GL_DEPTH_TEST);
-  GLfloat AmbientLight[] = {1.0, 1.0, 1.0};
-  glLightfv (GL_LIGHT0, GL_AMBIENT, AmbientLight);
-  // Draw players
-  for (unsigned int i = 0; i < players.size(); i++) {
-    for (unsigned int j = 0; j < players.size(); j++) {
-      DrawPlayer(&players[j]);
-      DrawTrail(&players[j], &players[i], camera.xfov);
-    }
-  }
-
-  // Return to full screen viewport
+   // Return to full screen viewport
    glViewport(0, 0, GLUTwindow_width, GLUTwindow_height);
 
    DrawGameText();
@@ -486,13 +463,13 @@ void StartGame() {
 	     view, scene->BBox().DiagonalLength(), init_positions, init_directions);
    game_start_time = GetTime();
    gameover = false;
+   SwitchMenu(IN_GAME);
 }
 
 void UpdateGame(R3Scene *scene)
 {
   // Get current time (in seconds) since start of execution
   double current_time = GetTime();
-  static double previous_time = 0;
 
   // program just started up?
   if (previous_time == 0) previous_time = current_time;
@@ -514,18 +491,27 @@ void UpdateGame(R3Scene *scene)
     Check_Collisions(scene, &players[i], delta_time, NORMAL);
   }
 
-  int living = 0;
+  int humans_living = 0; 
+  int ai_living = 0;
   for (unsigned int i = 0; i < players.size(); i++) {
      if (players[i].dead) { continue; }
-     living++;
+     if (!players[i].IsAI()) { humans_living++; }
+     else { ai_living++; }
 
      // Move players
      UpdatePlayer(scene, &players[i], delta_time);
   }
 
   // Gameover when only one player remaining
-  gameover = (living == 0);
+  gameover = (humans_living == 0)
+     || (humans_living <= 1 && ai_living == 0) // 1 player vs 1 ai
+     || (humans_living <= 1 && num_ai == 0); // 2 player game
   if (gameover) {
+     for (unsigned int i = 0; i < players.size(); i++) {
+	if (players[i].win) { continue; }
+	players[i].win =  !players[i].dead;
+     }
+
      // Handle high scores
      ifstream get_scores;
      get_scores.open ("scores.txt");
@@ -539,34 +525,6 @@ void UpdateGame(R3Scene *scene)
         scores << new_score;
         scores << "\n";
      }
-
-     int MAX_LINE_LEN = 50;
-     char text[] = "GAMOVER";
-     DrawGameoverText(text, 20, 20);
-
-     /*for (unsigned int i = 0; i < players.size(); i++) {
-        if (!players[i].is_ai) {
-          print("Player " + i + ":  ")
-        }
-        else {
-          print("Computer   : ")
-        }
-        if (!players[i].dead) {
-          print("WINS!")
-        }
-        else {
-          print("LOSES")
-        }
-      }*/
-
-        //wait
-
-
-
-
-     // Reset to the main menu
-     previous_time = 0;
-     SwitchMenu(MAIN_MENU);
   }
 }
 
@@ -1002,6 +960,9 @@ void GLUTRedraw(void)
 void SwitchMenu(int new_menu) {
    menu = new_menu;
    menu_option = 0;
+   
+   // Reset game time
+   previous_time = 0;
 }
 
 void MainMenuToggle(int action) {
@@ -1069,7 +1030,10 @@ void OptionsMenuToggle(int action) {
 
 // Handles all option toggling
 void MenuToggle(int action) {
-   if (Playing()) { return; }
+   if (Playing()) {
+      if (action == MENU_ENTER) { SwitchMenu(MAIN_MENU); }
+      return; 
+   }
 
    switch (menu) {
       case MAIN_MENU:
