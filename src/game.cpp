@@ -9,8 +9,8 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 13.0f;
-static const float TURN_SPEED = 3.0f;
+static const float PLAYER_SPEED = 5.0f;
+static const float TURN_SPEED = 2.0f;
 static const float PATH_WIDTH = 0.01f;
 
 static const float TRAIL_DIAMETER = 0.05;
@@ -19,7 +19,7 @@ static const float MIN_PIPE_DETAIL = 3;
 
 static Color PLAYER_COLORS[] = {
    Color(1.0,0.5,0.0),
-   Color(0.0,0.0,1.0),
+   Color(0.0,0.0,.75),
    Color(0.0,1.0,0.0),
    Color(1.0,0.0,0.0)
 };
@@ -243,7 +243,7 @@ void DrawPlayer(Player *player) {
 
 }
 
-void DrawTrail(Player *player, Player *perspective) {
+void DrawTrail(Player *player, Player *perspective, double xfov) {
    static GLUquadricObj *glu_sphere = gluNewQuadric();
    gluQuadricTexture(glu_sphere, GL_TRUE);
    gluQuadricNormals(glu_sphere, (GLenum) GLU_SMOOTH);
@@ -251,6 +251,11 @@ void DrawTrail(Player *player, Player *perspective) {
 
    R3Vector normal = perspective->direction;
    R3Point pos = ComputeEye(perspective, perspective->view);
+
+   R3Vector nor1 = normal;
+   R3Vector nor2 = normal;
+   nor1.Rotate(R3posz_vector, ((xfov-.01)/2)*(180/M_PI));
+   nor2.Rotate(R3posz_vector, -((xfov-.01)/2)*(180/M_PI));
 
    for (unsigned int i = 1; i < player->trail.size(); i++) {
       // Make cylinder between p1 and p2
@@ -262,27 +267,32 @@ void DrawTrail(Player *player, Player *perspective) {
       R3Vector u = p2 - pos;
 
       if (v.Dot(normal) > 0 && u.Dot(normal) > 0){
-	 // Compute direction and angle of rotation from standard
-	 R3Vector p = (p2 - p1);
-	 R3Vector t = R3Vector(R3zaxis_vector);
-	 t.Cross(p);
-	 double angle = 180 / M_PI * acos (R3zaxis_vector.Dot(p) / p.Length());
+         if((v.Dot(nor1) > 0 && u.Dot(nor1) > 0) && (v.Dot(nor2) > 0 && u.Dot(nor2) > 0)){
 
-	 // Level of detail
-	 R3Point pipe_center = (p2 - p1)/2 + p1;
-	 double percent = R3Distance(pos, pipe_center) / level_size * 1.25;
-	 percent = 1 - sqrt(percent);
-	 int detail = (int) (MAX_PIPE_DETAIL * percent);
-	 detail = MAX(detail, MIN_PIPE_DETAIL);
+      	 // Compute direction and angle of rotation from standard
+      	 R3Vector p = (p2 - p1);
+      	 R3Vector t = R3Vector(R3zaxis_vector);
+      	 t.Cross(p);
+      	 double angle = 180 / M_PI * acos (R3zaxis_vector.Dot(p) / p.Length());
 
-	 // Draw cylinder
-	 glPushMatrix();
-	 glTranslated(p1.X(),p1.Y(),p1.Z());
-	 glRotated(angle,t.X(),t.Y(),t.Z());
-	 gluCylinder(glu_sphere, TRAIL_DIAMETER, TRAIL_DIAMETER, p.Length(), detail, detail);
-	 glPopMatrix();
+      	 // Level of detail
+      	 R3Point pipe_center = (p2 - p1)/2 + p1;
+      	 double percent = R3Distance(pos, pipe_center) / level_size * 1.25;
+      	 percent = 1 - sqrt(percent);
+      	 int detail = (int) (MAX_PIPE_DETAIL * percent);
+      	 detail = MAX(detail, MIN_PIPE_DETAIL);
+
+      	 // Draw cylinder
+
+      	 glPushMatrix();
+      	 glTranslated(p1.X(),p1.Y(),p1.Z());
+      	 glRotated(angle,t.X(),t.Y(),t.Z());
+      	 gluCylinder(glu_sphere, TRAIL_DIAMETER, TRAIL_DIAMETER, p.Length(), detail, detail);
+      	 glPopMatrix();
+         }
       }
    }
+
 }
 
 void MovePlayer(int player_num, int turn_dir) {

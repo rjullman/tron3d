@@ -405,7 +405,7 @@ void DrawGame(R3Scene *scene)
       // Draw players
       for (unsigned int j = 0; j < players.size(); j++) {
 	 DrawPlayer(&players[j]);
-	 DrawTrail(&players[j], &players[i]);
+	 DrawTrail(&players[j], &players[i], camera.xfov);
       }
    }
 
