@@ -27,10 +27,10 @@ static const double USE_FUEL_RATE = 2.0;
 static const double CHARGE_FUEL_RATE = 1.0;
 
 static Color PLAYER_COLORS[] = {
-   Color(1.0,0.5,0.0),
-   Color(0.0,0.0,.75),
-   Color(0.0,1.0,0.0),
-   Color(1.0,0.0,0.0)
+   Color(.25,0.125,0.0),
+   Color(0.0,0.0,.125),
+   Color(0.0,.25,0.0),
+   Color(.25,0.0,0.0)
 };
 
 static const char* BIKE_MESH_LOC = "../bikes/m1483.off";

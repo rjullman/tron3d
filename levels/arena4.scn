@@ -8,12 +8,12 @@
 # lighting
 
 player_position
-18.0 10.0 0.5
+20.0 10.0 0.5
 -1.0 -0.1 0.0 
 
 player_position
--18.0 10.0 0.5
--1.0 0.0 0.0 
+-20.0 10.0 0.5
+1.0 0.0 0.0 
 
 player_position
 15.0 -15.0 0.5
