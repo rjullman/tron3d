@@ -10,7 +10,7 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 3.0f;
+static const float PLAYER_SPEED = 10.0f;
 static const float TURN_SPEED = 3.0f;
 static const float AI_TURN_SPEED = M_PI/2.0;
 static const float PATH_WIDTH = 0.01f;
@@ -212,6 +212,7 @@ bool Check_Collisions(R3Scene *scene, Player *player, double delta_time, int for
    // Check for collisions in scene
    if (for_decisions == CHECK_FRONT)
       testpoint = nextpoint;
+
    if (Collide_Scene(scene, scene->root, testpoint)) {
       if (for_decisions == NORMAL) {
          player->dead = true;
@@ -254,8 +255,9 @@ bool Collide_Box(R3Scene *scene, R3Node *node, R3Point testpoint) {
 bool Collide_Scene(R3Scene *scene, R3Node *node, R3Point testpoint) {
 
    if (node->shape != NULL && node->shape->type == R3_BOX_SHAPE) {
-      if (Collide_Box(scene, node, testpoint))
+      if (Collide_Box(scene, node, testpoint)) {
          return true;
+      }
    }
 
    // Check for collision with children nodes
@@ -269,8 +271,9 @@ bool Collide_Scene(R3Scene *scene, R3Node *node, R3Point testpoint) {
 
 bool Collide_Trails(Player *player, R3Point testpoint, R3Point nextpoint) {
    for (unsigned int i = 1; i < player->trail.size(); i++) {
-      if (Segment_Intersection(testpoint, nextpoint, player->trail[i-1], player->trail[i]))
+      if (Segment_Intersection(testpoint, nextpoint, player->trail[i-1], player->trail[i])) {
          return true;
+      }
    }
    return false;
 }
@@ -296,16 +299,8 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
       float t3 = abs((p3 - p1).Dot(dir) / dir.Dot(dir));
       float t4 = abs((p4 - p1).Dot(dir) / dir.Dot(dir));
 
-      if (t3 <= t2 || t4 <= t2) {
-         printf("%f t3\n",t3);
-         printf("%f t4\n",t4);
-         p1.Print();
-         printf("\n");
-         p4.Print();
-         printf("\n");
-
-         return true;
-      }
+      if (t3 <= t2 || t4 <= t2)
+         return abs(z1 - z2) < BIKE_HEIGHT/4;
       else
          return false;
    }
@@ -315,6 +310,9 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
 
    if (xi < MIN(x1,x2) || xi > MAX(x1,x2)) return false;
    if (xi < MIN(x3,x4) || xi > MAX(x3,x4)) return false;
+
+   if (yi < MIN(y1,y2) || yi > MAX(y1,y2)) return false;
+   if (yi < MIN(y3,y4) || yi > MAX(y3,y4)) return false;
 
    return abs(z1 - z2) < BIKE_HEIGHT/4;
 }

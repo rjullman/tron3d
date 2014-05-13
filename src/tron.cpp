@@ -476,7 +476,6 @@ void UpdateGame(R3Scene *scene)
     if (players[i].dead) { continue; }
 
     Check_Collisions(scene, &players[i], delta_time, NORMAL, 1);
-
   }
 
   int living = 0;
@@ -489,7 +488,7 @@ void UpdateGame(R3Scene *scene)
   }
 
   // Gameover when only one player remaining
-  gameover = (living == num_ai);
+  gameover = (living == 0);
   if (gameover) {
      // Handle high scores
      ifstream get_scores;
@@ -967,8 +966,10 @@ void OptionsMenuToggle(int action) {
       case NUM_PLAYERS_SELECTED:
 	 if (action == MENU_LEFT  ||
 	     action == MENU_RIGHT ||
-	     action == MENU_ENTER)
+	     action == MENU_ENTER) {
 	    num_humans = 3 - num_humans;
+	    num_ai = 1 - num_ai;
+	 }
 	 break;
       case VIEW_SELECTED:
 	 if (action == MENU_LEFT)
@@ -1048,44 +1049,6 @@ void GLUTSpecial(int key, int x, int y)
 
    // Redraw
    glutPostRedisplay();
-}
-
-// Handles all option toggling
-void GLUTEnterPressed() {
-   if (Playing()) { return; }
-
-   switch (menu) {
-      case MAIN_MENU:
-	 switch (menu_option) {
-	    case START_GAME_SELECTED:
-	       StartGame();
-	       break;
-	    case OPTIONS_SELECTED:
-	       SwitchMenu(OPTIONS_MENU);
-	       break;
-	    case QUIT_SELECTED:
-	       quit = 1;
-	       break;
-	 }
-	 break;
-
-      case OPTIONS_MENU:
-	 switch (menu_option) {
-	       case NUM_PLAYERS_SELECTED:
-		  num_humans = 3 - num_humans;
-      num_ai = 1 - num_ai;
-		  break;
-	       case BACK_SELECTED:
-		  SwitchMenu(MAIN_MENU);
-		  break;
-	       case PLAYER_1_LEFT_SELECTED:
-	       case PLAYER_1_RIGHT_SELECTED:
-	       case PLAYER_2_LEFT_SELECTED:
-	       case PLAYER_2_RIGHT_SELECTED:
-		  break;
-	 }
-	 break;
-   }
 }
 
 void GLUTKeyboard(unsigned char key, int x, int y)
