@@ -42,14 +42,21 @@ enum { MENU_ENTER, MENU_LEFT, MENU_RIGHT };
 int menu = MAIN_MENU;
 int menu_option = 0;
 
+static const int NUM_LEVELS = 3;
+static const char* level_path = "../levels/";
+static const char* level_extn = ".scn";
+static const char* level_names[NUM_LEVELS] = { "arena1", "arena2", "arena3" };
+
 static const char* main_menu_text[] = {
    "START GAME",
    "PLAYERS:           %d",
+   "LEVEL:                %s",
    "OPTIONS",
    "QUIT"};
 enum {
    START_GAME_SELECTED,
    NUM_PLAYERS_SELECTED,
+   LEVEL_SELECTED,
    OPTIONS_SELECTED,
    QUIT_SELECTED,
    NUM_MAIN_MENU_ITEMS
@@ -87,6 +94,8 @@ static bool gameover = true;
 
 static int num_humans = 1;
 static int num_ai = 1;
+
+static int level = 0;
 
 static int view = OVER_THE_SHOULDER;
 static int sound_fx = MAX_SOUND_FX_VOL / 2;
@@ -302,6 +311,9 @@ void DrawMenu()
 	       case NUM_PLAYERS_SELECTED:
 		  snprintf(s, MAX_LINE_LEN, cur, num_humans);
 		  break;
+	       case LEVEL_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, cur, level_names[level]);
+		  break;
 	       default:
 		  snprintf(s, MAX_LINE_LEN, "%s", cur);
 		  break;
@@ -479,10 +491,19 @@ void DrawGame(R3Scene *scene)
    DrawGameText();
 }
 
+R3Scene *
+ReadScene(const char *filename);
+
 void StartGame() {
    // Initialize game
+   char scene_name[100];
+   snprintf(scene_name, 100, "%s%s%s", level_path, level_names[level], level_extn);
+   fprintf(stderr, "%s\n", scene_name);
+   scene = ReadScene(scene_name);
+
    InitLevel(num_humans, num_ai,
 	     view, scene->BBox().DiagonalLength(), init_positions, init_directions);
+   
    game_start_time = GetTime();
    gameover = false;
    SwitchMenu(IN_GAME);
@@ -953,8 +974,9 @@ void GLUTRedraw(void)
    glDepthMask(true);
 
    // Clear window
-   R3Rgb background = scene->background;
-   glClearColor(background[0], background[1], background[2], background[3]);
+   // R3Rgb background = scene->background;
+   // glClearColor(background[0], background[1], background[2], background[3]);
+   glClearColor(0.0, 0.0, 0.0, 1.0);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    // Menu
@@ -965,10 +987,10 @@ void GLUTRedraw(void)
    else {
       UpdateGame(scene);
       DrawGame(scene);
+      
+      // Load scene lights
+      LoadLights(scene);
    }
-
-   // Load scene lights
-   LoadLights(scene);
 
    // Quit here so that can save image before exit
    if (quit) {
@@ -1001,7 +1023,16 @@ void MainMenuToggle(int action) {
 	    num_ai = 1 - num_ai;
 	 }
 	 break;
-     case OPTIONS_SELECTED:
+      case LEVEL_SELECTED:
+	 if (action == MENU_LEFT) {
+	    level--;
+	 } else if (action == MENU_RIGHT 
+		    || action == MENU_ENTER) {
+	    level++;
+	 }
+	 level = (level + NUM_LEVELS) % NUM_LEVELS;
+	 break;
+      case OPTIONS_SELECTED:
 	 if (action == MENU_ENTER)
 	    SwitchMenu(OPTIONS_MENU);
 	 break;
@@ -1331,14 +1362,14 @@ int
 main(int argc, char **argv)
 {
    // Parse program arguments
-   if (!ParseArgs(argc, argv)) exit(1);
+   // if (!ParseArgs(argc, argv)) exit(1);
 
    // Initialize GLUT
    GLUTInit(&argc, argv);
 
    // Read scene
-   scene = ReadScene(input_scene_name);
-   if (!scene) exit(-1);
+   // scene = ReadScene(input_scene_name);
+   // if (!scene) exit(-1);
 
    // Run GLUT interface
    GLUTMainLoop();
