@@ -263,13 +263,20 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
    double d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
    if (d == 0) {
       R3Vector dir = p2 - p1;
-      float t1 = 0.f;
       float t2 = 1.f;
       float t3 = abs((p3 - p1).Dot(dir) / dir.Dot(dir));
       float t4 = abs((p4 - p1).Dot(dir) / dir.Dot(dir));
 
-      if (t3 <= t2 || t4 <= t2)
+      if (t3 <= t2 || t4 <= t2) {
+         printf("%f t3\n",t3);
+         printf("%f t4\n",t4);
+         p1.Print();
+         printf("\n");
+         p4.Print();
+         printf("\n");
+
          return true;
+      }
       else
          return false;
    }

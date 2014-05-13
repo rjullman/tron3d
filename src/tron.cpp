@@ -354,14 +354,14 @@ void DrawGameText() {
    sprintf(s,"-------  Tron 3D --------");
    glPushMatrix();
    glLoadIdentity();
-   renderBitmapString(5,30,0,GLUT_BITMAP_HELVETICA_12,s);
+   renderBitmapString(310,30,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
    sprintf(s,"Round Duration: %f", GetTime() - game_start_time);
-   renderBitmapString(7,50,0,GLUT_BITMAP_HELVETICA_12,s);
+   renderBitmapString(310,50,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
 
   sprintf(s,"High Score: %s", high_score.c_str());
-   renderBitmapString(7,70,0,GLUT_BITMAP_HELVETICA_12,s);
+   renderBitmapString(310,70,0,GLUT_BITMAP_HELVETICA_12,s);
    glPopMatrix();
 
 
@@ -381,7 +381,7 @@ void SetupViewport(int player_num, int total_players) {
 	 glViewport(0, 0, GLUTwindow_width, GLUTwindow_height);
 	 break;
       case 2:
-	 int y = player_num == 0 ? GLUTwindow_width/2 : 0;
+	 int y = player_num == 0 ? GLUTwindow_height/2 : 0;
 	 glViewport(0, y, GLUTwindow_width, GLUTwindow_height/2);
 	 break;
    }
@@ -411,7 +411,32 @@ void DrawGame(R3Scene *scene)
       }
     }
 
-   // Return to full screen viewport
+
+
+  glViewport(0, GLUTwindow_height- 128, 128, 128);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(360.0/M_PI*0.25, (GLdouble) 1, 0.01, 10000);
+  gluLookAt(  0, 0, 40,
+           0, 0,  0.0f,
+           1.0f, 0.0f,  0.0f);
+  // Draw scene surfaces
+  //glEnable(GL_LIGHTING);
+  //DrawScene(scene);
+
+  glClearDepth(1);
+  glEnable(GL_DEPTH_TEST);
+  GLfloat AmbientLight[] = {1.0, 1.0, 1.0};
+  glLightfv (GL_LIGHT0, GL_AMBIENT, AmbientLight);
+  // Draw players
+  for (unsigned int i = 0; i < players.size(); i++) {
+    for (unsigned int j = 0; j < players.size(); j++) {
+      DrawPlayer(&players[j]);
+      DrawTrail(&players[j], &players[i], camera.xfov);
+    }
+  }
+
+  // Return to full screen viewport
    glViewport(0, 0, GLUTwindow_width, GLUTwindow_height);
 
    DrawGameText();
@@ -462,7 +487,7 @@ void UpdateGame(R3Scene *scene)
   }
 
   // Gameover when only one player remaining
-  gameover = (living == 0);
+  gameover = (living == num_ai);
   if (gameover) {
      // Handle high scores
      ifstream get_scores;
