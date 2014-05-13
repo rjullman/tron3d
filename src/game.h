@@ -86,7 +86,7 @@ bool Collide_Trails(Player *player, R3Point testpoint, R3Point nextpoint);
 bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4);
 
 void DrawPlayer(Player *player);
-void DrawTrail(Player *player);
+void DrawTrail(Player *player, Player *perspective);
 
 void MovePlayer(int player_num, int turn_dir);
 

@@ -370,9 +370,9 @@ void DrawGame(R3Scene *scene)
       DrawScene(scene);
 
       // Draw players
-      for (unsigned int i = 0; i < players.size(); i++) {
-        DrawPlayer(&players[i]);
-	      DrawTrail(&players[i]);
+      for (unsigned int j = 0; j < players.size(); j++) {
+	 DrawPlayer(&players[j]);
+	 DrawTrail(&players[j], &players[i]);
       }
    }
 
