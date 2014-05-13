@@ -53,8 +53,8 @@ enum {
 static const char* options_menu_text[] = {
    "PLAYERS:       %d",
    "VIEW:              %s",
-//   "MUSIC:           %d/%d",
-//   "SOUND FX:    %d/%d",
+   "MUSIC:           %d/%d",
+   "SOUND FX:    %d/%d",
    "P1 LEFT:         %s",
    "P1 RIGHT:      %s",
    "P2 LEFT:         %s",
@@ -64,14 +64,14 @@ static const char* options_menu_text[] = {
 enum {
    NUM_PLAYERS_SELECTED,
    VIEW_SELECTED,
+   MUSIC_SELECTED,
+   SOUND_FX_SELECTED,
    PLAYER_1_LEFT_SELECTED,
    PLAYER_1_RIGHT_SELECTED,
    PLAYER_2_LEFT_SELECTED,
    PLAYER_2_RIGHT_SELECTED,
    BACK_SELECTED,
    NUM_OPTIONS_MENU_ITEMS,
-   MUSIC_SELECTED,
-   SOUND_FX_SELECTED,
 };
 
 
