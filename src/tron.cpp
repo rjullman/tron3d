@@ -403,7 +403,7 @@ void DrawGame(R3Scene *scene)
       // Draw scene surfaces
       glEnable(GL_LIGHTING);
       DrawScene(scene);
-      
+
       // Draw players
       for (unsigned int j = 0; j < players.size(); j++) {
 	 DrawPlayer(&players[j]);

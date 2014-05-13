@@ -10,7 +10,7 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 3.0f;
+static const float PLAYER_SPEED = 7.0f;
 static const float TURN_SPEED = 3.0f;
 static const float AI_TURN_SPEED = M_PI/2.0;
 static const float PATH_WIDTH = 0.01f;
@@ -34,6 +34,23 @@ static Color PLAYER_COLORS[] = {
 
 static const char* BIKE_MESH_LOC = "../bikes/m1483.off";
 R3Mesh bike;
+
+////////////////////////////////////////////////////////////
+// Random Number Generator
+////////////////////////////////////////////////////////////
+
+static double
+RandomNumber(void)
+{
+#if defined(_WIN32)
+  int r1 = rand();
+  double r2 = ((double) rand()) / ((double) (RAND_MAX + 1));
+  return (r1 + r2) / ((double) (RAND_MAX + 1));
+#else
+  return drand48();
+#endif
+}
+
 
 ////////////////////////////////////////////////////////////
 // GLOBAL VARIABLES
@@ -158,7 +175,23 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
          }
       }
       else {
-         player->position += player->direction * PLAYER_SPEED * delta_time;
+         double x = RandomNumber();
+         if (x <= 0.02) {
+            double y = RandomNumber();
+            if (y <= 0.5) {
+               player->direction.Rotate(R3zaxis_vector,
+                1 * AI_TURN_SPEED);
+               player->position += player->direction * PLAYER_SPEED * delta_time;
+            }
+            else {
+                player->direction.Rotate(R3zaxis_vector,
+                -1 * AI_TURN_SPEED);
+               player->position += player->direction * PLAYER_SPEED * delta_time;
+            }
+         }
+         else {
+            player->position += player->direction * PLAYER_SPEED * delta_time;
+         }
       }
    }
    else {
@@ -175,7 +208,7 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
 	 player->fuel_time = MIN(FULL_FUEL, player->fuel_time);
 	 player->position.SetZ(BIKE_HEIGHT/2);
       }
-      
+
       // Turn the player
       player->direction.Rotate(R3zaxis_vector,
    			    player->turn * TURN_SPEED * delta_time);
@@ -297,13 +330,6 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
       float t4 = abs((p4 - p1).Dot(dir) / dir.Dot(dir));
 
       if (t3 <= t2 || t4 <= t2) {
-         printf("%f t3\n",t3);
-         printf("%f t4\n",t4);
-         p1.Print();
-         printf("\n");
-         p4.Print();
-         printf("\n");
-
          return true;
       }
       else
@@ -315,6 +341,9 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
 
    if (xi < MIN(x1,x2) || xi > MAX(x1,x2)) return false;
    if (xi < MIN(x3,x4) || xi > MAX(x3,x4)) return false;
+
+   if (yi < MIN(y1,y2) || yi > MAX(y1,y2)) return false;
+   if (yi < MIN(y3,y4) || yi > MAX(y3,y4)) return false;
 
    return abs(z1 - z2) < BIKE_HEIGHT/4;
 }
@@ -354,7 +383,7 @@ void DrawFuel(Player *player) {
    glMatrixMode(GL_MODELVIEW);
    glPushMatrix();
    glLoadIdentity();
-   
+
    // Font choice
    void * font = GLUT_BITMAP_TIMES_ROMAN_24;
 
@@ -368,7 +397,7 @@ void DrawFuel(Player *player) {
       // Make a gradient of colors
       double n = (1 - i * 1.0 / (GLUTwindow_height - pad)) * 100;
       double R=(255.0*n)/100.0;
-      double G=(255.0*(100.0-n))/100.0; 
+      double G=(255.0*(100.0-n))/100.0;
       glColor3d(R/255.0, G/255.0, 0.0);
 
       // Draw '*' to indicate fuel bar
