@@ -11,7 +11,7 @@ Final Project: <BR>
 COS 426, Spring 2013<BR>
 Vinay Ayyala, vayyala<BR>
 Richard Freling, rfreling<BR>
-Bobby Ullman, bullman<BR>
+Bobby Ullman, rjullman<BR>
 </H2>
 </CENTER>
 <HR><BR>
@@ -91,16 +91,7 @@ We believe that we have implemented the following features:
 <TBODY>
   <TR>
     <TD vAlign=top align=middle>
-       <A href="output/oneparticle.gif"><IMG  width=256 src="output/oneparticle.gif"></A><BR>
-       <A href="input/oneparticle.scn">oneparticle.scn</A>
-    </TD>
-    <TD vAlign=top align=middle>
-       <A href="output/cannonball.gif"><IMG width=256  src="output/cannonball.gif"></A><BR>
-       <A href="input/cannonball.scn">cannonball.scn</A>
-    </TD>
-    <TD vAlign=top align=middle>
-       <A href="output/dragrace.gif"><IMG width=256 src="output/dragrace.gif"></A><BR>
-       <A href="input/dragrace.scn">dragrace.scn</A>
+       <A href="writeup/multiple_viewports.png"><IMG width=512 src="writeup/multiple_viewports.png"></A><BR>
     </TD>
 </TR>
 </TBODY>
@@ -114,35 +105,16 @@ Comments
 <H3><A name="lighting"> Lighting and smooth shading </A></H3>
 <!------------------------------------------------------------------------>
 
-<TABLE cellSpacing=0 cellPadding=10 border=0>
-<TBODY>
-  <TR>
-    <TD vAlign=top align=middle>
-       <A href="output/starburst.gif"><IMG width=256 src="output/starburst.gif"></A><BR>
-       <A href="input/starburst.scn">starburst.scn</A>
-    </TD>
-  </TR>
-</TBODY>
-</TABLE>
 
-Comments
+Used the OpenGL library to deal with lighting and smooth shading of our objects and scene.
 <hr><br>
 
 <!------------------------------------------------------------------------>
 <H3><A name="userinput"> User input </A></H3>
 <!------------------------------------------------------------------------>
 
-<TABLE cellSpacing=0 cellPadding=10 border=0>
-<TBODY>
-  <TR>
-    <TD vAlign=top align=middle>
-       <A href="output/climbing_sphere.gif"><IMG width=256 src="output/climbing_sphere.gif"></A><BR>
-       <A href="input/climbing_sphere.scn">climbing_sphere.scn</A>
-    </TD>
-</TBODY>
-</TABLE>
 
-Comments
+Control your own bike using the arrow keys/'awd'. Also an interactive menuw with game options.
 <hr><br>
 
 <!------------------------------------------------------------------------>
@@ -160,7 +132,10 @@ Comments
 </TBODY>
 </TABLE>
 
-Comments
+Computer driven bikes during single player mode. The computer controlled bikes
+are programmed to drive away from upcoming collisions at right angles if possible,
+though they are also programmed to occasionally (randomly) make turns to add some sort
+of error / interesting paths.
 <HR><BR>
 
 
@@ -172,8 +147,8 @@ Comments
 <TBODY>
   <TR>
     <TD vAlign=top align=middle>
-       <A href="output/collisions.gif"><IMG width=256 src="output/collisions.gif"></A><BR>
-       <A href="input/collisions.scn">collisions.scn</A>
+       <A href="writeup/texture_mapping.png"><IMG width=512 src="writeup/texture_mapping.png"></A><BR>
+       Texture Mapping on scene
     </TD>
 </TR>
 </TBODY>
@@ -192,14 +167,22 @@ Comments.
 <TBODY>
   <TR>
     <TD vAlign=top align=middle>
-       <A href="output/interesting_scene.gif"><IMG width=512 src="output/interesting_scene.gif"></A><BR>
-       <A href="input/interesting_scene.scn">interesting_scene.scn</A><BR>
+       <A href="writeup/multiple_viewports.png"><IMG width=512 src="writeup/multiple_viewports.png"></A><BR>
+       Over the Shoulder View <BR>
+    </TD>
+    <TD vAlign=top align=middle>
+       <A href="writeup/over_the_shoulder_view.png"><IMG width=512 src="writeup/over_the_shoulder_view.png"></A><BR>
+       Over the Shoulder View <BR>
+    </TD>
+    <TD vAlign=top align=middle>
+       <A href="writeup/first_person_view.png"><IMG width=512 src="writeup/first_person_view.png"></A><BR>
+       First Person View<BR>
     </TD>
   </TR>
 </TBODY>
 </TABLE>
 
-Comments.
+Ability to toggle between an over-the-shoulder (third-person) view and a first person view.
 <HR><BR>
 
 <!------------------------------------------------------------------------>
@@ -210,14 +193,14 @@ Comments.
 <TBODY>
   <TR>
     <TD vAlign=top align=middle>
-       <A href="output/collisions.gif"><IMG width=256 src="output/collisions.gif"></A><BR>
-       <A href="input/collisions.scn">collisions.scn</A>
+       <A href="writeup/jumping.mov">jumping.mov</A><BR>
     </TD>
 </TR>
 </TBODY>
 </TABLE>
 
-Comments.
+Interactive menu screens. During gameplay, informational text about round duration and
+high scores. Also, a 'boost meter' that shows amount of fuel available for jump.
 <HR><BR>
 
 <!------------------------------------------------------------------------>
@@ -235,7 +218,7 @@ Comments.
 </TBODY>
 </TABLE>
 
-Comments.
+Only print the objects in the scene that are inside the view frustum of the camera.
 <HR><BR>
 
 <!------------------------------------------------------------------------>
@@ -271,7 +254,12 @@ Comments.
 </TBODY>
 </TABLE>
 
-Comments.
+Check each bike in the scene for collisions with the scene or any of the previously
+laid trails. The method for collisions with the scene is a simple check of whether the
+bike goes inside the objects. The method for collisions with the trails is a check of whether
+the segment connecing each trail path intersects with the segment composed of the bike front
+and the immediate next position it will take. Additional checks had to be made to deal
+with special cases like parallel lines.
 <HR><BR>
 
 <!------------------------------------------------------------------------>

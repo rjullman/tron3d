@@ -291,7 +291,7 @@ void DrawMenuHelper(const char* text[], int items) {
 void DrawMenu()
 {
    int MAX_LINE_LEN = 50;
-   
+
    int num_options = 0;
    switch (menu) {
       case MAIN_MENU:
@@ -306,7 +306,7 @@ void DrawMenu()
    // Created formatted options
    for (int i = 0; i < num_options; i++) {
       char* s = new char[MAX_LINE_LEN];
-      
+
       switch (menu) {
 	 case MAIN_MENU:
 	 {
@@ -474,7 +474,7 @@ void DrawGame(R3Scene *scene)
       DrawEndGameText(&players[i]);
     }
 
-   glViewport(0, GLUTwindow_height- 128, 128, 128);
+   /*glViewport(0, GLUTwindow_height- 128, 128, 128);
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
    gluPerspective(360.0/M_PI*0.25, (GLdouble) 1, 0.01, 10000);
@@ -494,7 +494,7 @@ void DrawGame(R3Scene *scene)
 	 DrawTrail(&players[j], &players[i], camera.xfov);
       }
    }
-
+*/
    // Return to full screen viewport
    glViewport(0, 0, GLUTwindow_width, GLUTwindow_height);
 
@@ -513,7 +513,7 @@ void StartGame() {
    // Initialize game
    InitLevel(num_humans, num_ai,
 	     view, scene->BBox().DiagonalLength(), init_positions, init_directions);
-   
+
    game_start_time = GetTime();
    gameover = false;
    SwitchMenu(IN_GAME);
@@ -544,7 +544,7 @@ void UpdateGame(R3Scene *scene)
     Check_Collisions(scene, &players[i], delta_time, NORMAL);
   }
 
-  int humans_living = 0; 
+  int humans_living = 0;
   int ai_living = 0;
   for (unsigned int i = 0; i < players.size(); i++) {
      if (players[i].dead) { continue; }
@@ -997,7 +997,7 @@ void GLUTRedraw(void)
    else {
       UpdateGame(scene);
       DrawGame(scene);
-      
+
       // Load scene lights
       LoadLights(scene);
    }
@@ -1014,7 +1014,7 @@ void GLUTRedraw(void)
 void SwitchMenu(int new_menu) {
    menu = new_menu;
    menu_option = 0;
-   
+
    // Reset game time
    previous_time = 0;
 }
@@ -1024,7 +1024,7 @@ void MainMenuToggle(int action) {
       case START_GAME_SELECTED:
 	 if (action == MENU_ENTER)
 	    StartGame();
-	 break; 
+	 break;
       case NUM_PLAYERS_SELECTED:
 	 if (action == MENU_LEFT  ||
 	     action == MENU_RIGHT ||
@@ -1036,7 +1036,7 @@ void MainMenuToggle(int action) {
       case LEVEL_SELECTED:
 	 if (action == MENU_LEFT) {
 	    level--;
-	 } else if (action == MENU_RIGHT 
+	 } else if (action == MENU_RIGHT
 		    || action == MENU_ENTER) {
 	    level++;
 	 }
@@ -1097,7 +1097,7 @@ void OptionsMenuToggle(int action) {
 void MenuToggle(int action) {
    if (Playing()) {
       if (action == MENU_ENTER) { SwitchMenu(MAIN_MENU); }
-      return; 
+      return;
    }
 
    switch (menu) {
