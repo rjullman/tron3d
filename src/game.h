@@ -24,8 +24,9 @@ enum {
 };
 
 enum {
-   OVER_THE_SHOULDER = 0,
-   FIRST_PERSON = 1
+   OVER_THE_SHOULDER,
+   FIRST_PERSON,
+   NUM_VIEWS
 };
 
 enum {
@@ -84,7 +85,8 @@ inline bool Player::IsAI() { return is_ai; }
 ////////////////////////////////////////////////////////////
 
 void InitGame();
-void InitLevel(int human_players, int ai_players);
+void InitLevel(int human_players, int ai_players,
+               int view, double size);
 
 void GameUpdate(void);
 void UpdateCamera(Player *player, int camera_perspective);
@@ -99,7 +101,7 @@ bool Collide_Trails(Player *player, R3Point testpoint, R3Point nextpoint);
 bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4);
 
 void DrawPlayer(Player *player);
-void DrawTrail(Player *player, Player *perspective);
+void DrawTrail(Player *player, Player *perspective, double xfov);
 
 void MovePlayer(int player_num, int turn_dir);
 

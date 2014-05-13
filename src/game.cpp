@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////
 
 #include "game.h"
-// #include "irrKlang/include/irrKlang.h"
+#include "irrKlang/include/irrKlang.h"
 
 ////////////////////////////////////////////////////////////
 // GLOBAL CONSTANTS
@@ -15,10 +15,12 @@ static const float AI_TURN_SPEED = M_PI/2.0;
 static const float PATH_WIDTH = 0.01f;
 
 static const float TRAIL_DIAMETER = 0.05;
+static const float MAX_PIPE_DETAIL = 32;
+static const float MIN_PIPE_DETAIL = 3;
 
 static Color PLAYER_COLORS[] = {
    Color(1.0,0.5,0.0),
-   Color(0.0,0.0,1.0),
+   Color(0.0,0.0,.75),
    Color(0.0,1.0,0.0),
    Color(1.0,0.0,0.0)
 };
@@ -31,7 +33,8 @@ R3Mesh bike;
 ////////////////////////////////////////////////////////////
 
 extern vector<Player> players;
-
+static double level_size;
+// MUSIC: irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
 
 ////////////////////////////////////////////////////////////
 // PLAYER IMPLEMENTATION
@@ -60,8 +63,7 @@ Player(Color color, bool is_ai, R3Point position, R3Vector direction, int view)
 
 void InitGame() {
    // Load Sound
-   // irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
-   // engine->play2D("ridindirty.mp3", true);
+   // MUSIC: engine->play2D("ridindirty.mp3", true);
 
    // Load bike mesh
    bike.Read(BIKE_MESH_LOC);
@@ -72,19 +74,23 @@ void InitGame() {
 }
 
 
-void InitLevel(int human_players, int ai_players) {
+void InitLevel(int human_players, int ai_players,
+	       int view, double size) {
+   level_size = size;
+
    players.clear();
    for (int i = 0; i < human_players + ai_players; i++) {
       bool ai = (i >= (human_players));
-      R3Point startposition(0,0,0.5);
+      R3Point startposition(0,1,0.5);
       R3Vector startdirection(1,0,0);
 
       if (i == 1) {
-         startposition = R3Point(18,1,0.5);
+         startposition = R3Point(18,0,0.5);
          startdirection = R3Vector(-1,0,0);
       }
 
-      players.push_back(Player(PLAYER_COLORS[i], ai, startposition, startdirection, OVER_THE_SHOULDER));
+      players.push_back(Player(PLAYER_COLORS[i], ai, startposition,
+			       startdirection, view));
    }
 }
 
@@ -127,7 +133,6 @@ void UpdateCamera(Player *player, int camera_perspective) {
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
    if (player->is_ai) {
       if (Check_Collisions(scene, player, delta_time, CHECK_FRONT, 100)) {
-         printf("00000\n");
          if (Check_Collisions(scene, player, delta_time, CHECK_LEFT, 50) && !(Check_Collisions(scene, player, delta_time, CHECK_RIGHT, 50))) {
             player->direction.Rotate(R3zaxis_vector,
                 1 * AI_TURN_SPEED);
@@ -186,8 +191,10 @@ bool Check_Collisions(R3Scene *scene, Player *player, double delta_time, int for
    if (for_decisions == CHECK_FRONT)
       testpoint = nextpoint;
    if (Collide_Scene(scene, scene->root, testpoint)) {
-      if (for_decisions == NORMAL)
+      if (for_decisions == NORMAL) {
          player->dead = true;
+         //MUSIC: engine->play2D("crash.wav");
+      }
       return true;
    }
    else {
@@ -197,8 +204,10 @@ bool Check_Collisions(R3Scene *scene, Player *player, double delta_time, int for
       // Check for collisions with laid paths
       for (unsigned int j = 0; j < players.size(); j++) {
          if (Collide_Trails(&players[j], testpoint, nextpoint)) {
-            if (for_decisions == NORMAL)
+            if (for_decisions == NORMAL) {
                player->dead = true;
+               // MUSIC: engine->play2D("crash.wav");
+            }
             return true;
          }
       }
@@ -256,7 +265,18 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
    double y4 = p4.Y();
 
    double d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
-   if (d == 0) return false;
+   if (d == 0) {
+      R3Vector dir = p2 - p1;
+      float t1 = 0.f;
+      float t2 = 1.f;
+      float t3 = abs((p3 - p1).Dot(dir) / dir.Dot(dir));
+      float t4 = abs((p4 - p1).Dot(dir) / dir.Dot(dir));
+
+      if (t3 <= t2 || t4 <= t2)
+         return true;
+      else
+         return false;
+   }
 
    double xi = ((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d;
    double yi = ((y3-y4)*(x1*y2-y1*x2)-(y1-y2)*(x3*y4-y3*x4))/d;
@@ -289,7 +309,7 @@ void DrawPlayer(Player *player) {
 
 }
 
-void DrawTrail(Player *player, Player *perspective) {
+void DrawTrail(Player *player, Player *perspective, double xfov) {
    static GLUquadricObj *glu_sphere = gluNewQuadric();
    gluQuadricTexture(glu_sphere, GL_TRUE);
    gluQuadricNormals(glu_sphere, (GLenum) GLU_SMOOTH);
@@ -297,6 +317,11 @@ void DrawTrail(Player *player, Player *perspective) {
 
    R3Vector normal = perspective->direction;
    R3Point pos = ComputeEye(perspective, perspective->view);
+
+   R3Vector nor1 = normal;
+   R3Vector nor2 = normal;
+   nor1.Rotate(R3posz_vector, ((xfov-.01)/2)*(180/M_PI));
+   nor2.Rotate(R3posz_vector, -((xfov-.01)/2)*(180/M_PI));
 
    for (unsigned int i = 1; i < player->trail.size(); i++) {
       // Make cylinder between p1 and p2
@@ -308,20 +333,32 @@ void DrawTrail(Player *player, Player *perspective) {
       R3Vector u = p2 - pos;
 
       if (v.Dot(normal) > 0 && u.Dot(normal) > 0){
-	 // Compute direction and angle of rotation from standard
-	 R3Vector p = (p2 - p1);
-	 R3Vector t = R3Vector(R3zaxis_vector);
-	 t.Cross(p);
-	 double angle = 180 / M_PI * acos (R3zaxis_vector.Dot(p) / p.Length());
+         if((v.Dot(nor1) > 0 && u.Dot(nor1) > 0) && (v.Dot(nor2) > 0 && u.Dot(nor2) > 0)){
 
-	 // Draw cylinder
-	 glPushMatrix();
-	 glTranslated(p1.X(),p1.Y(),p1.Z());
-	 glRotated(angle,t.X(),t.Y(),t.Z());
-	 gluCylinder(glu_sphere, TRAIL_DIAMETER, TRAIL_DIAMETER, p.Length(), 32, 32);
-	 glPopMatrix();
+      	 // Compute direction and angle of rotation from standard
+      	 R3Vector p = (p2 - p1);
+      	 R3Vector t = R3Vector(R3zaxis_vector);
+      	 t.Cross(p);
+      	 double angle = 180 / M_PI * acos (R3zaxis_vector.Dot(p) / p.Length());
+
+      	 // Level of detail
+      	 R3Point pipe_center = (p2 - p1)/2 + p1;
+      	 double percent = R3Distance(pos, pipe_center) / level_size * 1.25;
+      	 percent = 1 - sqrt(percent);
+      	 int detail = (int) (MAX_PIPE_DETAIL * percent);
+      	 detail = MAX(detail, MIN_PIPE_DETAIL);
+
+      	 // Draw cylinder
+
+      	 glPushMatrix();
+      	 glTranslated(p1.X(),p1.Y(),p1.Z());
+      	 glRotated(angle,t.X(),t.Y(),t.Z());
+      	 gluCylinder(glu_sphere, TRAIL_DIAMETER, TRAIL_DIAMETER, p.Length(), detail, detail);
+      	 glPopMatrix();
+         }
       }
    }
+
 }
 
 void MovePlayer(int player_num, int turn_dir) {
