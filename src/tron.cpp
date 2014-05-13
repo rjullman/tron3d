@@ -241,7 +241,6 @@ void DrawMenuText(const char *text, bool select, bool options, double px, double
    }
 
    // Display characters
-   glDisable(GL_LIGHTING);
    glColor3d(1.0, 1.0, 1.0);
    while (*text) {
       glutBitmapCharacter(font, *text);
@@ -393,6 +392,7 @@ void SetupViewport(int player_num, int total_players) {
 }
 
 void DrawEndGameText(Player *player) {
+   glColor3d(1.0, 1.0, 1.0);
    if (player->win) {
       DrawMenuText("YOU WIN!", false, false, GLUTwindow_width/2 - 75, GLUTwindow_width/2);
    } else if (player->dead) {
