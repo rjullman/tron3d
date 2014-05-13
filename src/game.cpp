@@ -74,19 +74,15 @@ void InitGame() {
 
 
 void InitLevel(int human_players, int ai_players,
-	       int view, double size) {
+	       int view, double size, vector<R3Point> init_positions,
+          vector<R3Vector> init_directions) {
    level_size = size;
 
    players.clear();
    for (int i = 0; i < human_players + ai_players; i++) {
       bool ai = i >= (human_players);
-      R3Point startposition(0,0,0.5);
-      R3Vector startdirection(1,0,0);
-
-      if (i == 1) {
-         startposition = R3Point(18,0,0.5);
-         startdirection = R3Vector(-1,0,0);
-      }
+      R3Point startposition = init_positions[i];
+      R3Vector startdirection = init_directions[i];
 
       players.push_back(Player(PLAYER_COLORS[i], ai, startposition,
 			       startdirection, view));

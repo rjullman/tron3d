@@ -79,7 +79,7 @@ inline bool Player::IsAI() { return is_ai; }
 
 void InitGame();
 void InitLevel(int human_players, int ai_players,
-               int view, double size);
+               int view, double size, vector<R3Point> init_positions, vector<R3Vector> init_directions);
 
 void GameUpdate(void);
 void UpdateCamera(Player *player, int camera_perspective);

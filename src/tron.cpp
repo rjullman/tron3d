@@ -78,6 +78,8 @@ enum {
 // Game variables
 
 vector<Player> players;
+vector<R3Point> init_positions;
+vector<R3Vector> init_directions;
 static bool gameover = true;
 
 static int num_humans = 1;
@@ -418,7 +420,7 @@ void DrawGame(R3Scene *scene)
 void StartGame() {
    // Initialize game
    InitLevel(num_humans, num_ai,
-	     view, scene->BBox().DiagonalLength());
+	     view, scene->BBox().DiagonalLength(), init_positions, init_directions);
    game_start_time = GetTime();
    gameover = false;
 }
@@ -1157,6 +1159,34 @@ ReadScene(const char *filename)
    // Remember initial camera
    camera = scene->camera;
 
+    FILE *fp;
+    if (!(fp = fopen(filename, "r"))) {
+      fprintf(stderr, "Unable to open file %s", filename);
+      return 0;
+    }
+
+    char cmd[128];
+    vector<R3Particle *> particles_for_springs;
+    while (fscanf(fp, "%s", cmd) == 1) {
+      if (cmd[0] == '#') {
+          // Comment -- read everything until end of line
+          do { cmd[0] = fgetc(fp); } while ((cmd[0] >= 0) && (cmd[0] != '\n'));
+        }
+      else if (!strcmp(cmd, "player_position")) {
+        R3Point position;
+        R3Vector direction;
+        if(fscanf(fp, "%lf%lf%lf%lf%lf%lf", &position[0], &position[1], &position[2],
+          &direction[0], &direction[1], &direction[2]) != 6){
+          fprintf(stderr, "Unable to read player position\n");
+        }
+        if(direction[2] != 0){
+          direction[2] = 0;
+        }
+        direction.Normalize();
+        init_directions.push_back(direction);
+        init_positions.push_back(position);
+      }
+    }
    // Return scene
    return scene;
 }
