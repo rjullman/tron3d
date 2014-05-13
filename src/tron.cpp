@@ -1078,7 +1078,7 @@ void OptionsMenuToggle(int action) {
 
 // Handles all option toggling
 void MenuToggle(int action) {
-   if (Playing()) {
+   if (Playing() && gameover) {
       if (action == MENU_ENTER) { SwitchMenu(MAIN_MENU); }
       return;
    }
