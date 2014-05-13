@@ -28,6 +28,13 @@ enum {
    FIRST_PERSON = 1
 };
 
+enum {
+   NORMAL = 0,
+   CHECK_FRONT = 1,
+   CHECK_LEFT = 2,
+   CHECK_RIGHT = 3
+};
+
 struct Color {
    public:
       Color(double R, double G, double B);
@@ -83,7 +90,7 @@ void GameUpdate(void);
 void UpdateCamera(Player *player, int camera_perspective);
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time);
 
-void Check_Collisions(R3Scene *scene, Player *player, double delta_time);
+bool Check_Collisions(R3Scene *scene, Player *player, double delta_time, int for_decisions, int precision);
 bool Collide_Box(R3Scene *scene, R3Node *node, R3Point testpoint);
 bool Collide_Scene(R3Scene *scene, R3Node *node, R3Point testpoint);
 bool Collide_Trails(Player *player, R3Point testpoint, R3Point nextpoint);

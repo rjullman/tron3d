@@ -9,8 +9,9 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 7.0f;
+static const float PLAYER_SPEED = 3.0f;
 static const float TURN_SPEED = 3.0f;
+static const float AI_TURN_SPEED = M_PI/2.0;
 static const float PATH_WIDTH = 0.01f;
 
 static const float TRAIL_DIAMETER = 0.05;
@@ -74,16 +75,16 @@ void InitGame() {
 void InitLevel(int human_players, int ai_players) {
    players.clear();
    for (int i = 0; i < human_players + ai_players; i++) {
-      bool ai = i >= (human_players);
+      bool ai = (i >= (human_players));
       R3Point startposition(0,0,0.5);
       R3Vector startdirection(1,0,0);
 
       if (i == 1) {
-         startposition = R3Point(18,0,0.5);
+         startposition = R3Point(18,1,0.5);
          startdirection = R3Vector(-1,0,0);
       }
 
-      players.push_back(Player(PLAYER_COLORS[i], ai, startposition, startdirection, FIRST_PERSON));
+      players.push_back(Player(PLAYER_COLORS[i], ai, startposition, startdirection, OVER_THE_SHOULDER));
    }
 }
 
@@ -91,7 +92,7 @@ R3Point ComputeEye(Player *player, int camera_perspective) {
    if (camera_perspective == OVER_THE_SHOULDER)
       return player->position - 5 * player->direction;
    else if (camera_perspective == FIRST_PERSON)
-      return player->position + 1 * player->direction;
+      return player->position + 0.85 * player->direction;
 
    assert(false);
    return NULL;
@@ -124,33 +125,85 @@ void UpdateCamera(Player *player, int camera_perspective) {
 
 
 void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
-   // Turn the player
-   player->direction.Rotate(R3zaxis_vector,
-			    player->turn * TURN_SPEED * delta_time);
-   // Move the player
-   player->position += player->direction * PLAYER_SPEED * delta_time;
+   if (player->is_ai) {
+      if (Check_Collisions(scene, player, delta_time, CHECK_FRONT, 100)) {
+         printf("00000\n");
+         if (Check_Collisions(scene, player, delta_time, CHECK_LEFT, 50) && !(Check_Collisions(scene, player, delta_time, CHECK_RIGHT, 50))) {
+            player->direction.Rotate(R3zaxis_vector,
+                1 * AI_TURN_SPEED);
+            player->position += player->direction * PLAYER_SPEED * delta_time;
+         }
+         else if (!(Check_Collisions(scene, player, delta_time, CHECK_LEFT, 50)) && (Check_Collisions(scene, player, delta_time, CHECK_RIGHT, 50))) {
+            player->direction.Rotate(R3zaxis_vector,
+                -1 * AI_TURN_SPEED);
+            player->position += player->direction * PLAYER_SPEED * delta_time;
+         }
+         else {
+            player->direction.Rotate(R3zaxis_vector,
+                1 * AI_TURN_SPEED);
+            player->position += player->direction * PLAYER_SPEED * delta_time;
+         }
+      }
+      else {
+         player->position += player->direction * PLAYER_SPEED * delta_time;
+      }
+   }
+   else {
+      // Turn the player
+      player->direction.Rotate(R3zaxis_vector,
+   			    player->turn * TURN_SPEED * delta_time);
+      // Move the player
+      player->position += player->direction * PLAYER_SPEED * delta_time;
+   }
 
    // Continue the trail
    player->trail.push_back(player->position);
 }
 
-void Check_Collisions(R3Scene *scene, Player *player, double delta_time) {
+bool Check_Collisions(R3Scene *scene, Player *player, double delta_time, int for_decisions, int precision) {
+   R3Point nextpoint(0,0,0.5);
+
    // Test for Collisions
-   R3Point testpoint = player->position;
-   R3Point nextpoint = player->position + delta_time * PLAYER_SPEED * player->direction;
+   R3Point testpoint = player->position + 0.85 * player->direction;
+   if (for_decisions == NORMAL) {
+      nextpoint = player->position + 0.85 * player->direction + delta_time * PLAYER_SPEED * player->direction;
+   }
+   else if (for_decisions == CHECK_FRONT)  {
+      nextpoint = player->position + delta_time * PLAYER_SPEED * player->direction * 10;
+   }
+   else if (for_decisions == CHECK_LEFT) {
+      R3Vector side = R3zaxis_vector;
+      side.Cross(player->direction);
+      nextpoint = player->position + delta_time * PLAYER_SPEED * side * precision;
+   }
+   else if (for_decisions == CHECK_RIGHT) {
+      R3Vector side = R3zaxis_vector;
+      side.Cross(player->direction);
+      nextpoint = player->position - delta_time * PLAYER_SPEED * side * precision;
+   }
 
    // Check for collisions in scene
+   if (for_decisions == CHECK_FRONT)
+      testpoint = nextpoint;
    if (Collide_Scene(scene, scene->root, testpoint)) {
-      player->dead = true;
+      if (for_decisions == NORMAL)
+         player->dead = true;
+      return true;
    }
    else {
+      if (for_decisions == CHECK_FRONT)
+         testpoint = player->position;
+
       // Check for collisions with laid paths
       for (unsigned int j = 0; j < players.size(); j++) {
          if (Collide_Trails(&players[j], testpoint, nextpoint)) {
-            player->dead = true;
+            if (for_decisions == NORMAL)
+               player->dead = true;
+            return true;
          }
       }
    }
+   return false;
 }
 
 bool Collide_Box(R3Scene *scene, R3Node *node, R3Point testpoint) {
@@ -206,6 +259,7 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
    if (d == 0) return false;
 
    double xi = ((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d;
+   double yi = ((y3-y4)*(x1*y2-y1*x2)-(y1-y2)*(x3*y4-y3*x4))/d;
 
    if (xi < MIN(x1,x2) || xi > MAX(x1,x2)) return false;
    if (xi < MIN(x3,x4) || xi > MAX(x3,x4)) return false;

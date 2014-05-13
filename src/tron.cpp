@@ -65,7 +65,7 @@ vector<Player> players;
 static bool gameover = true;
 
 static int num_humans = 1;
-static int num_ai = 0;
+static int num_ai = 1;
 
 static double game_start_time = 0;
 
@@ -372,10 +372,10 @@ void DrawGame(R3Scene *scene)
 
       // Draw players
       for (unsigned int j = 0; j < players.size(); j++) {
-	 DrawPlayer(&players[j]);
-	 DrawTrail(&players[j], &players[i]);
+	      DrawPlayer(&players[j]);
+	      DrawTrail(&players[j], &players[i]);
       }
-   }
+    }
 
    // Return to full screen viewport
    glViewport(0, 0, GLUTwindow_width, GLUTwindow_height);
@@ -406,7 +406,7 @@ void UpdateGame(R3Scene *scene)
   for (unsigned int i = 0; i < players.size(); i++) {
     if (players[i].dead) { continue; }
 
-    Check_Collisions(scene, &players[i], delta_time);
+    Check_Collisions(scene, &players[i], delta_time, NORMAL, 1);
 
   }
 
@@ -927,6 +927,7 @@ void GLUTEnterPressed() {
 	 switch (menu_option) {
 	       case NUM_PLAYERS_SELECTED:
 		  num_humans = 3 - num_humans;
+      num_ai = 1 - num_ai;
 		  break;
 	       case BACK_SELECTED:
 		  SwitchMenu(MAIN_MENU);
@@ -1136,9 +1137,6 @@ main(int argc, char **argv)
 
    // Initialize GLUT
    GLUTInit(&argc, argv);
-
-   // Initialize OpenAL
-   //alutInit(&argc, argv);
 
    // Read scene
    scene = ReadScene(input_scene_name);
