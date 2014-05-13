@@ -24,8 +24,9 @@ enum {
 };
 
 enum {
-   OVER_THE_SHOULDER = 0,
-   FIRST_PERSON = 1
+   OVER_THE_SHOULDER,
+   FIRST_PERSON,
+   NUM_VIEWS
 };
 
 struct Color {
@@ -77,7 +78,8 @@ inline bool Player::IsAI() { return is_ai; }
 ////////////////////////////////////////////////////////////
 
 void InitGame();
-void InitLevel(int human_players, int ai_players);
+void InitLevel(int human_players, int ai_players,
+               int view, double size);
 
 void GameUpdate(void);
 void UpdateCamera(Player *player, int camera_perspective);

@@ -9,11 +9,13 @@
 // GLOBAL CONSTANTS
 ////////////////////////////////////////////////////////////
 
-static const float PLAYER_SPEED = 7.0f;
+static const float PLAYER_SPEED = 13.0f;
 static const float TURN_SPEED = 3.0f;
 static const float PATH_WIDTH = 0.01f;
 
 static const float TRAIL_DIAMETER = 0.05;
+static const float MAX_PIPE_DETAIL = 32;
+static const float MIN_PIPE_DETAIL = 3;
 
 static Color PLAYER_COLORS[] = {
    Color(1.0,0.5,0.0),
@@ -30,7 +32,7 @@ R3Mesh bike;
 ////////////////////////////////////////////////////////////
 
 extern vector<Player> players;
-
+static double level_size;
 
 ////////////////////////////////////////////////////////////
 // PLAYER IMPLEMENTATION
@@ -71,7 +73,10 @@ void InitGame() {
 }
 
 
-void InitLevel(int human_players, int ai_players) {
+void InitLevel(int human_players, int ai_players,
+	       int view, double size) {
+   level_size = size;
+
    players.clear();
    for (int i = 0; i < human_players + ai_players; i++) {
       bool ai = i >= (human_players);
@@ -83,7 +88,8 @@ void InitLevel(int human_players, int ai_players) {
          startdirection = R3Vector(-1,0,0);
       }
 
-      players.push_back(Player(PLAYER_COLORS[i], ai, startposition, startdirection, FIRST_PERSON));
+      players.push_back(Player(PLAYER_COLORS[i], ai, startposition,
+			       startdirection, view));
    }
 }
 
@@ -260,11 +266,18 @@ void DrawTrail(Player *player, Player *perspective) {
 	 t.Cross(p);
 	 double angle = 180 / M_PI * acos (R3zaxis_vector.Dot(p) / p.Length());
 
+	 // Level of detail
+	 R3Point pipe_center = (p2 - p1)/2 + p1;
+	 double percent = R3Distance(pos, pipe_center) / level_size * 1.25;
+	 percent = 1 - sqrt(percent);
+	 int detail = (int) (MAX_PIPE_DETAIL * percent);
+	 detail = MAX(detail, MIN_PIPE_DETAIL);
+
 	 // Draw cylinder
 	 glPushMatrix();
 	 glTranslated(p1.X(),p1.Y(),p1.Z());
 	 glRotated(angle,t.X(),t.Y(),t.Z());
-	 gluCylinder(glu_sphere, TRAIL_DIAMETER, TRAIL_DIAMETER, p.Length(), 32, 32);
+	 gluCylinder(glu_sphere, TRAIL_DIAMETER, TRAIL_DIAMETER, p.Length(), detail, detail);
 	 glPopMatrix();
       }
    }

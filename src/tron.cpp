@@ -29,6 +29,7 @@ GLuint texture;
 // Menu variables
 
 enum { MAIN_MENU, OPTIONS_MENU };
+enum { MENU_ENTER, MENU_LEFT, MENU_RIGHT };
 int menu = MAIN_MENU;
 int menu_option = 0;
 
@@ -41,21 +42,27 @@ enum {
 };
 
 static const char* options_menu_text[] = {
-   "PLAYERS:   %d",
-   "P1 LEFT:     %s",
-   "P1 RIGHT:  %s",
-   "P2 LEFT:     %s",
-   "P2 RIGHT:  %s",
+   "PLAYERS:       %d",
+   "VIEW:              %s",
+//   "MUSIC:           %d/%d",
+//   "SOUND FX:    %d/%d",
+   "P1 LEFT:         %s",
+   "P1 RIGHT:      %s",
+   "P2 LEFT:         %s",
+   "P2 RIGHT:      %s",
    "BACK"
 };
 enum {
    NUM_PLAYERS_SELECTED,
+   VIEW_SELECTED,
    PLAYER_1_LEFT_SELECTED,
    PLAYER_1_RIGHT_SELECTED,
    PLAYER_2_LEFT_SELECTED,
    PLAYER_2_RIGHT_SELECTED,
    BACK_SELECTED,
-   NUM_OPTIONS_MENU_ITEMS
+   NUM_OPTIONS_MENU_ITEMS,
+   MUSIC_SELECTED,
+   SOUND_FX_SELECTED,
 };
 
 
@@ -66,6 +73,13 @@ static bool gameover = true;
 
 static int num_humans = 1;
 static int num_ai = 0;
+
+static int MAX_SOUND_FX_VOL = 4;
+static int MAX_MUSIC_VOL = 4;
+
+static int view = OVER_THE_SHOULDER;
+static int sound_fx = MAX_SOUND_FX_VOL / 2;
+static int music = MAX_MUSIC_VOL / 2;
 
 static double game_start_time = 0;
 
@@ -241,8 +255,8 @@ void DrawMenuHelper(const char* text[], int items) {
       bool selected = (menu_option % items) == i;
       DrawMenuText(text[i],
 		   selected,
-		   GLUTwindow_width/2 * 0.65,
-		   GLUTwindow_height/2 - (i-1) * 40);
+		   GLUTwindow_width/2 * 0.55,
+		   GLUTwindow_height/2 - (i-items/2) * 40);
    }
 }
 
@@ -263,6 +277,18 @@ void DrawMenu()
 	    switch (i) {
 	       case NUM_PLAYERS_SELECTED:
 		  snprintf(s, MAX_LINE_LEN, cur, num_humans);
+		  break;
+	       case VIEW_SELECTED:
+		  if (view == OVER_THE_SHOULDER)
+		     snprintf(s, MAX_LINE_LEN, cur, "shoulder");
+		  else if (view == FIRST_PERSON)
+		     snprintf(s, MAX_LINE_LEN, cur, "first person");
+		  break;
+	       case MUSIC_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, cur, music, MAX_MUSIC_VOL);
+		  break;
+	       case SOUND_FX_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, cur, sound_fx, MAX_SOUND_FX_VOL);
 		  break;
 	       case PLAYER_1_LEFT_SELECTED:
 		  snprintf(s, MAX_LINE_LEN, cur, "<-");
@@ -385,7 +411,8 @@ void DrawGame(R3Scene *scene)
 
 void StartGame() {
    // Initialize game
-   InitLevel(num_humans, num_ai);
+   InitLevel(num_humans, num_ai,
+	     view, scene->BBox().DiagonalLength());
    game_start_time = GetTime();
    gameover = false;
 }
@@ -875,7 +902,85 @@ void GLUTRedraw(void)
    glutSwapBuffers();
 }
 
+void SwitchMenu(int new_menu) {
+   menu = new_menu;
+   menu_option = 0;
+}
 
+void MainMenuToggle(int action) {
+   switch (menu_option) {
+      case START_GAME_SELECTED:
+	 if (action == MENU_ENTER)
+	    StartGame();
+	 break;
+      case OPTIONS_SELECTED:
+	 if (action == MENU_ENTER)
+	    SwitchMenu(OPTIONS_MENU);
+	 break;
+      case QUIT_SELECTED:
+	 if (action == MENU_ENTER)
+	    quit = 1;
+	 break;
+   }
+}
+
+void OptionsMenuToggle(int action) {
+   switch (menu_option) {
+      case NUM_PLAYERS_SELECTED:
+	 if (action == MENU_LEFT  ||
+	     action == MENU_RIGHT ||
+	     action == MENU_ENTER)
+	    num_humans = 3 - num_humans;
+	 break;
+      case VIEW_SELECTED:
+	 if (action == MENU_LEFT)
+	    view--;
+	 else if (action == MENU_RIGHT ||
+		  action == MENU_ENTER)
+	    view++;
+	 view = (view + NUM_VIEWS) % NUM_VIEWS;
+	 break;
+      case SOUND_FX_SELECTED:
+	 if (action == MENU_LEFT)
+	    sound_fx--;
+	 else if (action == MENU_RIGHT ||
+		  action == MENU_ENTER)
+	    sound_fx++;
+	 sound_fx = (sound_fx + MAX_SOUND_FX_VOL + 1) % (MAX_SOUND_FX_VOL + 1);
+	 break;
+      case MUSIC_SELECTED:
+	 if (action == MENU_LEFT)
+	    music--;
+	 else if (action == MENU_RIGHT ||
+		  action == MENU_ENTER)
+	    music++;
+	 music = (music + MAX_MUSIC_VOL + 1) % (MAX_MUSIC_VOL + 1);
+	 break;
+      case BACK_SELECTED:
+	 if (action == MENU_ENTER)
+	    SwitchMenu(MAIN_MENU);
+	 break;
+      case PLAYER_1_LEFT_SELECTED:
+      case PLAYER_1_RIGHT_SELECTED:
+      case PLAYER_2_LEFT_SELECTED:
+      case PLAYER_2_RIGHT_SELECTED:
+	 break;
+   }
+}
+
+// Handles all option toggling
+void MenuToggle(int action) {
+   if (Playing()) { return; }
+
+   switch (menu) {
+      case MAIN_MENU:
+	 MainMenuToggle(action);
+	 break;
+      case OPTIONS_MENU:
+	 OptionsMenuToggle(action);
+	 break;
+   }
+}
 
 void GLUTSpecial(int key, int x, int y)
 {
@@ -888,57 +993,19 @@ void GLUTSpecial(int key, int x, int y)
       case GLUT_KEY_LEFT :
 	 if (Playing())
 	    MovePlayer(0, TURNING_LEFT);
+	 else
+	    MenuToggle(MENU_LEFT);
 	 break;
       case GLUT_KEY_RIGHT :
 	 if (Playing())
 	    MovePlayer(0, TURNING_RIGHT);
+	 else
+	    MenuToggle(MENU_RIGHT);
 	 break;
    }
 
    // Redraw
    glutPostRedisplay();
-}
-
-void SwitchMenu(int new_menu) {
-   menu = new_menu;
-   menu_option = 0;
-}
-
-// Handles all option toggling
-void GLUTEnterPressed() {
-   if (Playing()) { return; }
-
-   switch (menu) {
-      case MAIN_MENU:
-	 switch (menu_option) {
-	    case START_GAME_SELECTED:
-	       StartGame();
-	       break;
-	    case OPTIONS_SELECTED:
-	       SwitchMenu(OPTIONS_MENU);
-	       break;
-	    case QUIT_SELECTED:
-	       quit = 1;
-	       break;
-	 }
-	 break;
-
-      case OPTIONS_MENU:
-	 switch (menu_option) {
-	       case NUM_PLAYERS_SELECTED:
-		  num_humans = 3 - num_humans;
-		  break;
-	       case BACK_SELECTED:
-		  SwitchMenu(MAIN_MENU);
-		  break;
-	       case PLAYER_1_LEFT_SELECTED:
-	       case PLAYER_1_RIGHT_SELECTED:
-	       case PLAYER_2_LEFT_SELECTED:
-	       case PLAYER_2_RIGHT_SELECTED:
-		  break;
-	 }
-	 break;
-   }
 }
 
 void GLUTKeyboard(unsigned char key, int x, int y)
@@ -963,7 +1030,7 @@ void GLUTKeyboard(unsigned char key, int x, int y)
          break;
 
       case 13: // ENTER
-	 GLUTEnterPressed();
+	 MenuToggle(MENU_ENTER);
 	 break;
 
       case 'Q':
