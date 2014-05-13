@@ -42,16 +42,20 @@ enum { MENU_ENTER, MENU_LEFT, MENU_RIGHT };
 int menu = MAIN_MENU;
 int menu_option = 0;
 
-static const char* main_menu_text[] = {"START GAME", "OPTIONS", "QUIT"};
+static const char* main_menu_text[] = {
+   "START GAME",
+   "PLAYERS:           %d",
+   "OPTIONS",
+   "QUIT"};
 enum {
    START_GAME_SELECTED,
+   NUM_PLAYERS_SELECTED,
    OPTIONS_SELECTED,
    QUIT_SELECTED,
    NUM_MAIN_MENU_ITEMS
 };
 
 static const char* options_menu_text[] = {
-   "PLAYERS:       %d",
    "VIEW:              %s",
    "MUSIC:           %d/%d",
    "SOUND FX:    %d/%d",
@@ -62,7 +66,6 @@ static const char* options_menu_text[] = {
    "BACK"
 };
 enum {
-   NUM_PLAYERS_SELECTED,
    VIEW_SELECTED,
    MUSIC_SELECTED,
    SOUND_FX_SELECTED,
@@ -274,22 +277,41 @@ void DrawMenuHelper(const char* text[], int items) {
 
 void DrawMenu()
 {
+   int MAX_LINE_LEN = 50;
+   
+   int num_options = 0;
    switch (menu) {
       case MAIN_MENU:
-	 DrawMenuHelper(main_menu_text, NUM_MAIN_MENU_ITEMS);
+	 num_options = NUM_MAIN_MENU_ITEMS;
 	 break;
       case OPTIONS_MENU:
-	 int MAX_LINE_LEN = 50;
+	 num_options = NUM_OPTIONS_MENU_ITEMS;
+   }
 
-	 // Created formatted options
-	 char** formatted = new char *[NUM_OPTIONS_MENU_ITEMS];
-	 for (int i = 0; i < NUM_OPTIONS_MENU_ITEMS; i++) {
-	    char* s = new char[MAX_LINE_LEN];
-	    const char* cur = options_menu_text[i];
+   char** formatted = new char *[num_options];
+
+   // Created formatted options
+   for (int i = 0; i < num_options; i++) {
+      char* s = new char[MAX_LINE_LEN];
+      
+      switch (menu) {
+	 case MAIN_MENU:
+	 {
+	    const char* cur = main_menu_text[i];
 	    switch (i) {
 	       case NUM_PLAYERS_SELECTED:
 		  snprintf(s, MAX_LINE_LEN, cur, num_humans);
 		  break;
+	       default:
+		  snprintf(s, MAX_LINE_LEN, "%s", cur);
+		  break;
+	    }
+	 }
+	 break;
+	 case OPTIONS_MENU:
+	 {
+	    const char* cur = options_menu_text[i];
+	    switch (i) {
 	       case VIEW_SELECTED:
 		  if (view == OVER_THE_SHOULDER)
 		     snprintf(s, MAX_LINE_LEN, cur, "shoulder");
@@ -316,22 +338,22 @@ void DrawMenu()
 		  break;
 	       case BACK_SELECTED:
 		  snprintf(s, MAX_LINE_LEN, "%s", cur);
-
 	    }
-	    formatted[i] = s;
 	 }
-
-	 // Draw formatted menu
-	 DrawMenuHelper((const char**) formatted, NUM_OPTIONS_MENU_ITEMS);
-
-	 // Clean up
-	 for (int i = 0; i < NUM_OPTIONS_MENU_ITEMS; i++) {
-	    delete[] formatted[i];
-	 }
-	 delete[] formatted;
-
 	 break;
+      }
+
+      formatted[i] = s;
    }
+
+   // Draw formatted menu
+   DrawMenuHelper((const char**) formatted, num_options);
+
+   // Clean up
+   for (int i = 0; i < num_options; i++) {
+      delete[] formatted[i];
+   }
+   delete[] formatted;
 }
 
 void DrawGameText() {
@@ -970,8 +992,16 @@ void MainMenuToggle(int action) {
       case START_GAME_SELECTED:
 	 if (action == MENU_ENTER)
 	    StartGame();
+	 break; 
+      case NUM_PLAYERS_SELECTED:
+	 if (action == MENU_LEFT  ||
+	     action == MENU_RIGHT ||
+	     action == MENU_ENTER) {
+	    num_humans = 3 - num_humans;
+	    num_ai = 1 - num_ai;
+	 }
 	 break;
-      case OPTIONS_SELECTED:
+     case OPTIONS_SELECTED:
 	 if (action == MENU_ENTER)
 	    SwitchMenu(OPTIONS_MENU);
 	 break;
@@ -984,14 +1014,6 @@ void MainMenuToggle(int action) {
 
 void OptionsMenuToggle(int action) {
    switch (menu_option) {
-      case NUM_PLAYERS_SELECTED:
-	 if (action == MENU_LEFT  ||
-	     action == MENU_RIGHT ||
-	     action == MENU_ENTER) {
-	    num_humans = 3 - num_humans;
-	    num_ai = 1 - num_ai;
-	 }
-	 break;
       case VIEW_SELECTED:
 	 if (action == MENU_LEFT)
 	    view--;
