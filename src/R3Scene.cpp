@@ -259,6 +259,17 @@ Read(const char *filename, R3Node *node)
       // Comment -- read everything until end of line
       do { cmd[0] = fgetc(fp); } while ((cmd[0] >= 0) && (cmd[0] != '\n'));
     }
+    else if (!strcmp(cmd, "player_position")) {
+      // printf("here\n");
+      R3Point position;
+      R3Vector direction;
+      if(fscanf(fp, "%lf%lf%lf%lf%lf%lf", &position[0], &position[1], &position[2],
+        &direction[0], &direction[1], &direction[2]) != 6){
+        fprintf(stderr, "Unable to read player position\n");
+      }
+      // // player_positions.push_back(position);
+
+    }
     else if (!strcmp(cmd, "particle")) {
       // Read position and velocity
       R3Point position;
