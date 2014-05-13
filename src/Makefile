@@ -11,27 +11,27 @@ CXXFLAGS=-Wall -I. -g -DUSE_JPEG
 # ⚡ echo $DYLD_LIBRARY_PATH
 
 
-# SELECT APPROPRIATE IRRKLANG LIBRARIES FOR DIFFERENT PLATFORMS                       
-ifeq ($(OS),Windows_NT)                                                  
-    IRRLIB =
-    IRRLIBPATH =
-    RMIRR =
-else
-    UNAME_S := $(shell uname -s)
-    ifeq ($(UNAME_S),Linux)
-        IRRLIB = irrklang/libIrrKlang.so
-        IRRLIBPATH = /usr/local/lib/
-        RMIRR = /usr/local/lib/libIrrKlang.so
-    endif
-    ifeq ($(UNAME_S),Darwin)
-        IRRLIB = irrKlang/libirrklang.dylib
-        MP3LIB = irrKlang/ikpMP3.dylib
-        IRRLIBPATH = /usr/local/lib/
-        RMIRR = /usr/local/lib/libirrklang.dylib
-        RMMP3 = /usr/local/lib/ikpMP3.dylib
-    endif
-endif
+# SELECT APPROPRIATE IRRKLANG LIBRARIES FOR DIFFERENT PLATFORMS
 
+#ifeq ($(OS),Windows_NT)                                                  
+#    IRRLIB =
+#    IRRLIBPATH =
+#    RMIRR =
+#else
+#    UNAME_S := $(shell uname -s)
+#    ifeq ($(UNAME_S),Linux)
+#        IRRLIB = irrklang/libIrrKlang.so
+#        IRRLIBPATH = /usr/local/lib/
+#        RMIRR = /usr/local/lib/libIrrKlang.so
+#    endif
+#    ifeq ($(UNAME_S),Darwin)
+#        IRRLIB = irrKlang/libirrklang.dylib
+#        MP3LIB = irrKlang/ikpMP3.dylib
+#        IRRLIBPATH = /usr/local/lib/
+#        RMIRR = /usr/local/lib/libirrklang.dylib
+#        RMMP3 = /usr/local/lib/ikpMP3.dylib
+#    endif
+#endif
 
 #
 # OpenGL libraries

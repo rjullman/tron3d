@@ -53,13 +53,13 @@ inline double Color::B(void) { return b; }
 
 struct Player {
    public:
-      Player(Color color, bool is_ai, R3Point position, R3Vector direction, int perspective);
+      Player(Color color, bool is_ai, R3Point position, R3Vector direction, int view);
 
       bool IsAI();
 
       R3Point position;
       R3Vector direction;
-      int perspective;
+      int view;
       R3Mesh *mesh;
       Color color;
       bool dead;
@@ -92,7 +92,7 @@ bool Collide_Trails(Player *player, R3Point testpoint, R3Point nextpoint);
 bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4);
 
 void DrawPlayer(Player *player);
-void DrawTrail(Player *player);
+void DrawTrail(Player *player, Player *perspective);
 
 void MovePlayer(int player_num, int turn_dir);
 
