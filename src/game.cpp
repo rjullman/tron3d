@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////
 
 #include "game.h"
- #include "irrKlang/include/irrKlang.h"
+#include "irrKlang/include/irrKlang.h"
 
 ////////////////////////////////////////////////////////////
 // GLOBAL CONSTANTS
@@ -33,7 +33,7 @@ R3Mesh bike;
 
 extern vector<Player> players;
 static double level_size;
-irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
+// MUSIC: irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
 
 ////////////////////////////////////////////////////////////
 // PLAYER IMPLEMENTATION
@@ -62,7 +62,7 @@ Player(Color color, bool is_ai, R3Point position, R3Vector direction, int view)
 
 void InitGame() {
    // Load Sound
-   engine->play2D("ridindirty.mp3", true);
+   // MUSIC: engine->play2D("ridindirty.mp3", true);
 
    // Load bike mesh
    bike.Read(BIKE_MESH_LOC);
@@ -148,14 +148,14 @@ void Check_Collisions(R3Scene *scene, Player *player, double delta_time) {
    // Check for collisions in scene
    if (Collide_Scene(scene, scene->root, testpoint)) {
       player->dead = true;
-      engine->play2D("crash.wav");
+      // MUSIC: engine->play2D("crash.wav");
    }
    else {
       // Check for collisions with laid paths
       for (unsigned int j = 0; j < players.size(); j++) {
          if (Collide_Trails(&players[j], testpoint, nextpoint)) {
             player->dead = true;
-            engine->play2D("crash.wav");
+            // MUSIC: engine->play2D("crash.wav");
          }
       }
    }

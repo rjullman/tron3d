@@ -16,6 +16,15 @@
 #include <iostream>
 
 ///////////////////////////////////////////////////////////
+// GLOBAL CONSTANTS
+////////////////////////////////////////////////////////////
+
+static double MAX_FPS = 60;
+
+static int MAX_SOUND_FX_VOL = 4;
+static int MAX_MUSIC_VOL = 4;
+
+///////////////////////////////////////////////////////////
 // GLOBAL VARIABLES
 ////////////////////////////////////////////////////////////
 
@@ -73,9 +82,6 @@ static bool gameover = true;
 
 static int num_humans = 1;
 static int num_ai = 0;
-
-static int MAX_SOUND_FX_VOL = 4;
-static int MAX_MUSIC_VOL = 4;
 
 static int view = OVER_THE_SHOULDER;
 static int sound_fx = MAX_SOUND_FX_VOL / 2;
@@ -429,6 +435,13 @@ void UpdateGame(R3Scene *scene)
   // time passed since starting
   double delta_time = current_time - previous_time;
 
+  // Limit frames drawn per second to MAX_FPS
+  if (delta_time > 1.0 / MAX_FPS) {
+      // Remember previous time
+      previous_time = current_time;
+  }
+  else { return; }
+
   // Check for any collisions
   for (unsigned int i = 0; i < players.size(); i++) {
     if (players[i].dead) { continue; }
@@ -446,28 +459,24 @@ void UpdateGame(R3Scene *scene)
      UpdatePlayer(scene, &players[i], delta_time);
   }
 
-  // Remember previous time
-  previous_time = current_time;
-
   // Gameover when only one player remaining
   gameover = (living == 0);
   if (gameover) {
-
-      ifstream get_scores;
-      get_scores.open ("scores.txt");
-      std::string high_score;
-      std::getline(get_scores, high_score);
-      double h_s = atof(high_score.c_str());
-
-      double new_score = GetTime() - game_start_time;
-      if (new_score > h_s){
+     // Handle high scores
+     ifstream get_scores;
+     get_scores.open ("scores.txt");
+     std::string high_score;
+     std::getline(get_scores, high_score);
+     double h_s = atof(high_score.c_str());
+     double new_score = GetTime() - game_start_time;
+     if (new_score > h_s){
         std::ofstream scores;
         scores.open("scores.txt", std::ios::out);
-        // FILE * scores = fopen("scores.txt", "w");
-        // scores, "%f",GetTime() - game_start_time);
         scores << new_score;
         scores << "\n";
-      }
+     }
+
+     // Reset to the main menu
      previous_time = 0;
      SwitchMenu(MAIN_MENU);
   }
