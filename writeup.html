@@ -151,7 +151,10 @@ of error / interesting paths.
 </TBODY>
 </TABLE>
 
-Comments.
+For texture mapping, we created a used openGL texture tutorials to write a function
+that reads textures from bitmap images. We used linear interpolation between
+mipmaps of the texture.
+
 <HR><BR>
 
 <!------------------------------------------------------------------------>
@@ -179,7 +182,7 @@ Comments.
 </TBODY>
 </TABLE>
 
-Ability to toggle between an over-the-shoulder (third-person) view and a first person view.
+Ability to toggle between an over-the-shoulder (third-person) view and a first person view. Also a two player mode with multiple viewports. 
 <HR><BR>
 
 <!------------------------------------------------------------------------>
@@ -237,7 +240,14 @@ with special cases like parallel lines.
 <!------------------------------------------------------------------------>
 
 
-Comments.
+We tried some different sound libraries and ended up using the IrrKlang library
+at the recommondation of other students on Piazza. When running the make file, 
+setup is called first, which copies the irrklang library to the usr/local/lib 
+directory (some make commands taken from Nicolas's Piazza post). We then create
+a background sound, which is a Tron MP3 found online, and a sound effects sound, 
+which is a crash sound. We can toggle fx and background sound volumes in the 
+menu options.
+
 <HR><BR>
 
 
