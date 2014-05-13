@@ -68,8 +68,10 @@ static const char* options_menu_text[] = {
    "SOUND FX:    %d/%d",
    "P1 LEFT:         %s",
    "P1 RIGHT:      %s",
+   "P1 UP:             %s",
    "P2 LEFT:         %s",
    "P2 RIGHT:      %s",
+   "P2 UP:             %s",
    "BACK"
 };
 enum {
@@ -78,8 +80,10 @@ enum {
    SOUND_FX_SELECTED,
    PLAYER_1_LEFT_SELECTED,
    PLAYER_1_RIGHT_SELECTED,
+   PLAYER_1_UP_SELECTED,
    PLAYER_2_LEFT_SELECTED,
    PLAYER_2_RIGHT_SELECTED,
+   PLAYER_2_UP_SELECTED,
    BACK_SELECTED,
    NUM_OPTIONS_MENU_ITEMS,
 };
@@ -342,11 +346,17 @@ void DrawMenu()
 	       case PLAYER_1_RIGHT_SELECTED:
 		  snprintf(s, MAX_LINE_LEN, cur, "->");
 		  break;
+	       case PLAYER_1_UP_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, cur, "^");
+		  break;
 	       case PLAYER_2_LEFT_SELECTED:
 		  snprintf(s, MAX_LINE_LEN, cur, "a");
 		  break;
 	       case PLAYER_2_RIGHT_SELECTED:
 		  snprintf(s, MAX_LINE_LEN, cur, "d");
+		  break;
+	       case PLAYER_2_UP_SELECTED:
+		  snprintf(s, MAX_LINE_LEN, cur, "w");
 		  break;
 	       case BACK_SELECTED:
 		  snprintf(s, MAX_LINE_LEN, "%s", cur);
@@ -1079,6 +1089,8 @@ void OptionsMenuToggle(int action) {
       case PLAYER_2_RIGHT_SELECTED:
 	 break;
    }
+   ChangeVolume(music);
+   ChangeFX(sound_fx);
 }
 
 // Handles all option toggling
