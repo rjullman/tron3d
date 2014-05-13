@@ -42,10 +42,10 @@ enum { MENU_ENTER, MENU_LEFT, MENU_RIGHT };
 int menu = MAIN_MENU;
 int menu_option = 0;
 
-static const int NUM_LEVELS = 3;
+static const int NUM_LEVELS = 5;
 static const char* level_path = "../levels/";
 static const char* level_extn = ".scn";
-static const char* level_names[NUM_LEVELS] = { "arena1", "arena2", "arena3" };
+static const char* level_names[NUM_LEVELS] = { "arena", "arena2", "arena3", "arena4", "arena5" };
 
 static const char* main_menu_text[] = {
    "START GAME",
@@ -495,12 +495,12 @@ R3Scene *
 ReadScene(const char *filename);
 
 void StartGame() {
-   // Initialize game
+   // Read Scene
    char scene_name[100];
    snprintf(scene_name, 100, "%s%s%s", level_path, level_names[level], level_extn);
-   fprintf(stderr, "%s\n", scene_name);
    scene = ReadScene(scene_name);
 
+   // Initialize game
    InitLevel(num_humans, num_ai,
 	     view, scene->BBox().DiagonalLength(), init_positions, init_directions);
    
@@ -1361,15 +1361,8 @@ ParseArgs(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
-   // Parse program arguments
-   // if (!ParseArgs(argc, argv)) exit(1);
-
    // Initialize GLUT
    GLUTInit(&argc, argv);
-
-   // Read scene
-   // scene = ReadScene(input_scene_name);
-   // if (!scene) exit(-1);
 
    // Run GLUT interface
    GLUTMainLoop();
