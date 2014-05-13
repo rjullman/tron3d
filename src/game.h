@@ -20,7 +20,9 @@
 enum {
    NOT_TURNING = 0,
    TURNING_LEFT = 1,
-   TURNING_RIGHT = -1
+   TURNING_RIGHT = -1,
+   JUMPING = 2,
+   NOT_JUMPING
 };
 
 enum {
@@ -73,6 +75,8 @@ struct Player {
       bool dead;
       bool is_ai;
       int turn;
+      bool jumping;
+      double fuel_time;
 
       vector<R3Point> trail;
 };
@@ -101,8 +105,9 @@ bool Collide_Trails(Player *player, R3Point testpoint, R3Point nextpoint);
 bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4);
 
 void DrawPlayer(Player *player);
+void DrawFuel(Player *player);
 void DrawTrail(Player *player, Player *perspective, double xfov);
 
-void MovePlayer(int player_num, int turn_dir);
+void MovePlayer(int player_num, int move);
 
 #endif

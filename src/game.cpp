@@ -4,6 +4,7 @@
 
 #include "game.h"
 #include "irrKlang/include/irrKlang.h"
+#include "fglut/fglut.h"
 
 ////////////////////////////////////////////////////////////
 // GLOBAL CONSTANTS
@@ -17,6 +18,12 @@ static const float PATH_WIDTH = 0.01f;
 static const float TRAIL_DIAMETER = 0.05;
 static const float MAX_PIPE_DETAIL = 32;
 static const float MIN_PIPE_DETAIL = 3;
+
+static const double BIKE_HEIGHT = 1.0;
+
+static const double FULL_FUEL = 2.0;
+static const double USE_FUEL_RATE = 2.0;
+static const double CHARGE_FUEL_RATE = 1.0;
 
 static Color PLAYER_COLORS[] = {
    Color(1.0,0.5,0.0),
@@ -33,7 +40,10 @@ R3Mesh bike;
 ////////////////////////////////////////////////////////////
 
 extern vector<Player> players;
+extern int GLUTwindow_height;
+extern int GLUTwindow_width;
 static double level_size;
+
 // MUSIC: irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
 
 ////////////////////////////////////////////////////////////
@@ -50,6 +60,8 @@ Player(Color color, bool is_ai, R3Point position, R3Vector direction, int view)
       dead(false),
       is_ai(is_ai),
       turn(NOT_TURNING),
+      jumping(false),
+      fuel_time(FULL_FUEL),
       trail(vector<R3Point>())
 {
    // Currently no bike mesh options
@@ -150,6 +162,20 @@ void UpdatePlayer(R3Scene *scene, Player *player, double delta_time) {
       }
    }
    else {
+      // Jump the player between 2 heights (ground and levitate)
+      if (player->jumping) {
+	 player->fuel_time -= delta_time * USE_FUEL_RATE;
+	 player->position.SetZ(BIKE_HEIGHT);
+	 if (player->fuel_time <= 0) {
+	    player->fuel_time = 0;
+	    player->jumping = false;
+	 }
+      } else {
+	 player->fuel_time += delta_time * CHARGE_FUEL_RATE;
+	 player->fuel_time = MIN(FULL_FUEL, player->fuel_time);
+	 player->position.SetZ(BIKE_HEIGHT/2);
+      }
+      
       // Turn the player
       player->direction.Rotate(R3zaxis_vector,
    			    player->turn * TURN_SPEED * delta_time);
@@ -260,6 +286,9 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
    double y3 = p3.Y();
    double y4 = p4.Y();
 
+   double z1 = (p1 + (p2-p1)/2).Z();
+   double z2 = (p3 + (p4-p3)/2).Z();
+
    double d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
    if (d == 0) {
       R3Vector dir = p2 - p1;
@@ -287,7 +316,7 @@ bool Segment_Intersection(R3Point p1, R3Point p2, R3Point p3, R3Point p4) {
    if (xi < MIN(x1,x2) || xi > MAX(x1,x2)) return false;
    if (xi < MIN(x3,x4) || xi > MAX(x3,x4)) return false;
 
-   return true;
+   return abs(z1 - z2) < BIKE_HEIGHT/4;
 }
 
 void DrawPlayer(Player *player) {
@@ -302,7 +331,7 @@ void DrawPlayer(Player *player) {
 
    // Display bike
    glPushMatrix();
-   glTranslatef(player->position.X(), player->position.Y(), 0.0f);
+   glTranslatef(player->position.X(), player->position.Y(), player->position.Z() - BIKE_HEIGHT/2);
    glRotatef(angle, 0.0f, 0.0f, 1.0f);
    //glutSolidCube(0.5f);
    player->mesh->Draw();
@@ -310,6 +339,52 @@ void DrawPlayer(Player *player) {
 
    glDisable(GL_COLOR_MATERIAL);
 
+}
+
+void DrawFuel(Player *player) {
+   // Disable lighting
+   GLboolean lighting = glIsEnabled(GL_LIGHTING);
+   glDisable(GL_LIGHTING);
+
+   // Save matrices and setup projection
+   glMatrixMode(GL_PROJECTION);
+   glPushMatrix();
+   glLoadIdentity();
+   gluOrtho2D(0.0, GLUTwindow_width, 0.0, GLUTwindow_height);
+   glMatrixMode(GL_MODELVIEW);
+   glPushMatrix();
+   glLoadIdentity();
+   
+   // Font choice
+   void * font = GLUT_BITMAP_TIMES_ROMAN_24;
+
+   // Determine height of fuel bar on screen
+   int pad = (int) GLUTwindow_height * .4;
+   double percent_fuel = player->fuel_time / FULL_FUEL;
+   int top = (int) ((GLUTwindow_height - pad) * percent_fuel);
+
+   // Display characters
+   for (int i = 0; i < top; i++) {
+      // Make a gradient of colors
+      double n = (1 - i * 1.0 / (GLUTwindow_height - pad)) * 100;
+      double R=(255.0*n)/100.0;
+      double G=(255.0*(100.0-n))/100.0; 
+      glColor3d(R/255.0, G/255.0, 0.0);
+
+      // Draw '*' to indicate fuel bar
+      glRasterPos2i(GLUTwindow_width * .9, i + pad/2);
+      glutBitmapCharacter(font, '*');
+   }
+
+   // Restore matrices
+   glMatrixMode(GL_MODELVIEW);
+   glPopMatrix();
+   glMatrixMode(GL_PROJECTION);
+   glPopMatrix();
+   glFlush();
+
+   // Restore lighting
+   if (lighting) glEnable(GL_LIGHTING);
 }
 
 void DrawTrail(Player *player, Player *perspective, double xfov) {
@@ -364,9 +439,23 @@ void DrawTrail(Player *player, Player *perspective, double xfov) {
 
 }
 
-void MovePlayer(int player_num, int turn_dir) {
+void MovePlayer(int player_num, int move) {
    if ((unsigned int) player_num >= players.size()) { return; }
-   players[player_num].turn = turn_dir;
+
+   switch (move) {
+      case JUMPING:
+	 players[player_num].jumping = true;
+	 break;
+      case NOT_JUMPING:
+	 players[player_num].jumping = false;
+	 break;
+      case TURNING_LEFT:
+      case TURNING_RIGHT:
+      case NOT_TURNING:
+      default:
+	 players[player_num].turn = move;
+	 break;
+   }
 }
 
 

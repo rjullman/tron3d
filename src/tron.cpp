@@ -102,8 +102,8 @@ static int quit = 0;
 // GLUT variables
 
 static int GLUTwindow = 0;
-static int GLUTwindow_height = 512;
-static int GLUTwindow_width = 512;
+int GLUTwindow_height = 512;
+int GLUTwindow_width = 512;
 
 
 
@@ -403,12 +403,14 @@ void DrawGame(R3Scene *scene)
       // Draw scene surfaces
       glEnable(GL_LIGHTING);
       DrawScene(scene);
-
+      
       // Draw players
       for (unsigned int j = 0; j < players.size(); j++) {
-	       DrawPlayer(&players[j]);
-	       DrawTrail(&players[j], &players[i], camera.xfov);
+	 DrawPlayer(&players[j]);
+	 DrawTrail(&players[j], &players[i], camera.xfov);
       }
+
+      DrawFuel(&players[i]);
     }
 
 
@@ -1023,7 +1025,11 @@ void GLUTSpecial(int key, int x, int y)
    // Process keyboard button event
    switch (key) {
       case GLUT_KEY_UP:
-	 menu_option--; break;
+	 if (Playing())
+	    MovePlayer(0, JUMPING);
+	 else
+	    menu_option--;
+	 break;
       case GLUT_KEY_DOWN:
 	 menu_option++; break;
       case GLUT_KEY_LEFT :
@@ -1086,6 +1092,12 @@ void GLUTKeyboard(unsigned char key, int x, int y)
 {
    // Process keyboard button event
    switch (key) {
+      case 'W':
+      case 'w':
+	 if (Playing())
+	    MovePlayer(1, JUMPING);
+	 break;
+
       case 'A':
       case 'a':
 	 if (Playing())
@@ -1121,6 +1133,11 @@ void GLUTKeyboard(unsigned char key, int x, int y)
 void GLUTKeyboardRelease(unsigned char key, int x, int y) {
    // Process keyboard button event
    switch (key) {
+      case 'W':
+      case 'w':
+	 if (Playing())
+	    MovePlayer(1, NOT_JUMPING);
+	 break;
       case 'A':
       case 'a':
       case 'D':
@@ -1137,6 +1154,10 @@ void GLUTKeyboardRelease(unsigned char key, int x, int y) {
 void GLUTSpecialRelease(int key, int x, int y) {
    // Process keyboard button event
    switch (key) {
+      case GLUT_KEY_UP:
+	 if (Playing())
+	    MovePlayer(0, NOT_JUMPING);
+	 break;
       case GLUT_KEY_LEFT:
       case GLUT_KEY_RIGHT:
 	 if (Playing())
